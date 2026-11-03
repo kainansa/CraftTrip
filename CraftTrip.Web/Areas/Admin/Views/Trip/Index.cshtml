@@ -1,0 +1,67 @@
+@model List<CraftTrip.Core.Entities.Trip>
+@{
+    ViewData["Title"] = "Quản lý Chuyến đi Tuyến trải nghiệm";
+}
+
+<div class="admin-container py-4">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+        <div>
+            <h1 class="h2 fw-bold text-dark mb-1">Chuyến đi Tuyến Làng nghề Tuyển chọn</h1>
+            <p class="text-muted fs-6 mb-0">Các gói tour trải nghiệm kết hợp tham quan làng nghề, làm đồ thủ công và ẩm thực địa phương</p>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 fs-6">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Hình ảnh</th>
+                        <th>Tên tuyến chuyến đi</th>
+                        <th>Làng nghề chính</th>
+                        <th>Thời lượng</th>
+                        <th>Số điểm dừng</th>
+                        <th>Giá tham khảo</th>
+                        <th class="text-center">Nổi bật</th>
+                        <th class="text-center pe-4">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var t in Model)
+                    {
+                        <tr>
+                            <td class="ps-4">
+                                <img src="@t.CoverImageUrl" class="rounded-3 shadow-xs" style="width: 70px; height: 50px; object-fit: cover;" alt="@t.Title" />
+                            </td>
+                            <td>
+                                <div class="fw-bold text-dark">@t.Title</div>
+                                <small class="text-muted text-truncate d-block" style="max-width: 320px;">@t.ShortDescription</small>
+                            </td>
+                            <td>@t.Village?.Name</td>
+                            <td>@t.DurationDescription</td>
+                            <td>
+                                <span class="badge bg-light text-dark border">@t.Itineraries.Count chặng</span>
+                            </td>
+                            <td class="fw-bold text-primary">@t.EstimatedCost.ToString("N0") đ</td>
+                            <td class="text-center">
+                                @if (t.IsFeatured)
+                                {
+                                    <span class="badge bg-warning text-dark px-2 py-1 rounded-pill"><i class="bi bi-star-fill"></i> Nổi bật</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted small">Thường</span>
+                                }
+                            </td>
+                            <td class="text-center pe-4">
+                                <a asp-area="" asp-controller="Trip" asp-action="Details" asp-route-id="@t.Id" target="_blank" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                                    <i class="bi bi-box-arrow-up-right me-1"></i> Xem trang
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

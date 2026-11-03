@@ -1,0 +1,99 @@
+@model CraftTrip.Web.ViewModels.BookingConfirmationViewModel
+@{
+    var b = Model.Booking;
+    ViewData["Title"] = "Xác nhận vé điện tử";
+}
+
+<div class="container py-5">
+    <div class="max-w-700 mx-auto">
+        @if (Model.PaymentSuccess)
+        {
+            <div class="text-center mb-4">
+                <div class="d-inline-flex align-items-center justify-content-center bg-success text-white rounded-circle mb-3" style="width: 72px; height: 72px;">
+                    <i class="bi bi-check-lg fs-1"></i>
+                </div>
+                <h2 class="font-serif fw-bold text-success mb-1">Đặt vé thành công!</h2>
+                <p class="text-muted">Cảm ơn bạn đã lựa chọn trải nghiệm cùng CraftTrip. Vé điện tử QR của bạn đã sẵn sàng.</p>
+            </div>
+        }
+        else
+        {
+            <div class="text-center mb-4">
+                <div class="d-inline-flex align-items-center justify-content-center bg-warning text-dark rounded-circle mb-3" style="width: 72px; height: 72px;">
+                    <i class="bi bi-exclamation-lg fs-1"></i>
+                </div>
+                <h2 class="font-serif fw-bold text-dark mb-1">Đơn đặt chỗ đã được ghi nhận</h2>
+                <p class="text-muted">@Model.Message</p>
+            </div>
+        }
+
+        <!-- Ticket Card -->
+        <div class="card border-0 shadow-lg rounded-4 overflow-hidden bg-white mb-4">
+            <div class="p-4 bg-wood text-white d-flex justify-content-between align-items-center" style="background-color: var(--ct-wood);">
+                <div>
+                    <span class="badge bg-warning text-dark fw-bold mb-1">VÉ ĐIỆN TỬ CRAFTTRIP</span>
+                    <h5 class="fw-bold mb-0 text-white">Mã đơn: @b.BookingCode</h5>
+                </div>
+                <div class="text-end">
+                    <span class="badge bg-white text-dark small px-3 py-2 fw-bold">@b.Status</span>
+                </div>
+            </div>
+
+            <div class="p-4 p-md-5">
+                <div class="row align-items-center g-4">
+                    <div class="col-md-5 text-center border-end-md pb-4 pb-md-0">
+                        @if (b.Ticket != null && !string.IsNullOrEmpty(b.Ticket.QrCodeData))
+                        {
+                            <div class="p-3 bg-light rounded-4 border d-inline-block shadow-sm">
+                                <img src="@b.Ticket.QrCodeData" alt="Mã QR vé" class="img-fluid" style="width: 180px; height: 180px;" />
+                            </div>
+                            <div class="mt-2 small text-muted font-monospace">@b.Ticket.TicketCode</div>
+                            <div class="small text-secondary fw-semibold mt-1">Đưa mã QR này cho nghệ nhân khi đến xưởng</div>
+                        }
+                    </div>
+
+                    <div class="col-md-7 ps-md-4">
+                        <h5 class="fw-bold mb-2">@b.Workshop?.Title</h5>
+                        <p class="small text-muted mb-3"><i class="bi bi-geo-alt-fill text-danger me-1"></i> @b.Workshop?.LocationAddress</p>
+
+                        <div class="bg-light rounded-3 p-3 small d-flex flex-column gap-2 mb-3">
+                            <div class="d-flex justify-content-between">
+                                <span class="text-muted">Ngày trải nghiệm:</span>
+                                <strong class="text-dark">@b.Slot?.Schedule?.Date.ToString("dddd, dd/MM/yyyy", new System.Globalization.CultureInfo("vi-VN"))</strong>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span class="text-muted">Khung giờ:</span>
+                                <strong class="text-dark">@b.Slot?.StartTime.ToString(@"hh\:mm") - @b.Slot?.EndTime.ToString(@"hh\:mm")</strong>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span class="text-muted">Số lượng khách:</span>
+                                <strong class="text-dark">@b.Quantity người</strong>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span class="text-muted">Người đặt:</span>
+                                <strong class="text-dark">@b.CustomerName (@b.CustomerPhone)</strong>
+                            </div>
+                            <div class="d-flex justify-content-between pt-2 border-top">
+                                <span class="text-muted">Tổng thanh toán:</span>
+                                <strong class="text-terracotta fs-6">@b.TotalAmount.ToString("N0") đ</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-footer bg-light p-3 text-center small text-muted border-0">
+                <i class="bi bi-info-circle me-1"></i> Quý khách vui lòng đến trước giờ trải nghiệm 10-15 phút để chuẩn bị trang phục và đón tiếp chu đáo nhất.
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-center gap-3">
+            <a asp-action="History" class="btn btn-primary px-4 py-2 fw-semibold">
+                <i class="bi bi-clock-history me-1"></i> Lịch sử đơn đặt chỗ
+            </a>
+            <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary px-4 py-2">
+                Trang chủ
+            </a>
+        </div>
+    </div>
+</div>

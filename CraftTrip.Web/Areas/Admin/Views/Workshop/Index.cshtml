@@ -1,0 +1,97 @@
+@model List<CraftTrip.Core.Entities.Workshop>
+@using CraftTrip.Core.Enums
+@{
+    ViewData["Title"] = "Quản lý Workshop Toàn sàn";
+}
+
+<div class="admin-container py-4">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+        <div>
+            <h1 class="h2 fw-bold text-dark mb-1">Quản lý Tất cả Trải nghiệm Workshop</h1>
+            <p class="text-muted fs-6 mb-0">Theo dõi toàn bộ danh sách workshop trên hệ thống, bật/tắt nổi bật và kiểm soát trạng thái xuất bản</p>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show rounded-4 p-3 mb-4" role="alert">
+            <i class="bi bi-check-circle-fill me-2 fs-5"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
+        <div class="card-header bg-white py-3 px-4 border-bottom">
+            <span class="fs-6 fw-bold">Tổng cộng: @Model.Count workshop</span>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 fs-6">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Hình ảnh</th>
+                        <th>Tên trải nghiệm</th>
+                        <th>Nghệ nhân / Xưởng</th>
+                        <th>Làng nghề</th>
+                        <th>Giá vé</th>
+                        <th class="text-center">Nổi bật</th>
+                        <th class="text-center">Trạng thái</th>
+                        <th class="text-center pe-4">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var w in Model)
+                    {
+                        <tr>
+                            <td class="ps-4">
+                                <img src="@w.CoverImageUrl" class="rounded-3 shadow-xs" style="width: 70px; height: 50px; object-fit: cover;" alt="@w.Title" />
+                            </td>
+                            <td>
+                                <div class="fw-bold text-dark">@w.Title</div>
+                                <small class="text-muted">@w.Category?.Name</small>
+                            </td>
+                            <td>
+                                <div class="fw-semibold">@w.Host?.FullName</div>
+                                <small class="text-muted">@w.Host?.HostProfile?.StudioName</small>
+                            </td>
+                            <td>@w.Village?.Name</td>
+                            <td class="fw-bold text-primary">@w.BasePrice.ToString("N0") đ</td>
+                            <td class="text-center">
+                                <form asp-action="ToggleFeatured" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@w.Id" />
+                                    <button type="submit" class="btn btn-sm @(w.IsFeatured ? "btn-warning" : "btn-light border") rounded-pill px-3">
+                                        <i class="bi @(w.IsFeatured ? "bi-star-fill text-dark" : "bi-star text-muted") me-1"></i>
+                                        @(w.IsFeatured ? "Nổi bật" : "Thường")
+                                    </button>
+                                </form>
+                            </td>
+                            <td class="text-center">
+                                @switch (w.Status)
+                                {
+                                    case WorkshopStatus.Published:
+                                        <span class="badge bg-success rounded-pill px-3 py-2">Đang mở bán</span>
+                                        break;
+                                    case WorkshopStatus.Pending:
+                                        <span class="badge bg-warning text-dark rounded-pill px-3 py-2">Chờ duyệt</span>
+                                        break;
+                                    case WorkshopStatus.Draft:
+                                        <span class="badge bg-secondary rounded-pill px-3 py-2">Bản nháp</span>
+                                        break;
+                                    case WorkshopStatus.Rejected:
+                                        <span class="badge bg-danger rounded-pill px-3 py-2">Bị từ chối</span>
+                                        break;
+                                }
+                            </td>
+                            <td class="text-center pe-4">
+                                <a asp-area="" asp-controller="Workshop" asp-action="Details" asp-route-id="@w.Id" target="_blank" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                                    <i class="bi bi-box-arrow-up-right me-1"></i> Xem trang
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

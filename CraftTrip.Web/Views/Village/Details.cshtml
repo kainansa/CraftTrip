@@ -1,0 +1,138 @@
+@model CraftTrip.Web.ViewModels.VillageDetailViewModel
+@{
+    var v = Model.Village;
+    ViewData["Title"] = v.Name;
+}
+
+<div class="container py-4">
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index" class="text-decoration-none">Trang chủ</a></li>
+            <li class="breadcrumb-item"><a asp-controller="Village" asp-action="Index" class="text-decoration-none">Làng nghề</a></li>
+            <li class="breadcrumb-item active" aria-current="page">@v.Name</li>
+        </ol>
+    </nav>
+
+    <!-- Hero Banner for Village -->
+    <div class="rounded-5 overflow-hidden position-relative mb-5 shadow-sm" style="height: 380px;">
+        <img src="@v.CoverImageUrl" alt="@v.Name" class="w-100 h-100 object-fit-cover" />
+        <div class="position-absolute inset-0 bg-dark bg-opacity-50 d-flex flex-column justify-content-end p-4 p-md-5 text-white">
+            <span class="badge bg-warning text-dark px-3 py-1 rounded-pill fw-bold mb-2 align-self-start">
+                <i class="bi bi-geo-alt-fill me-1"></i> @v.Location
+            </span>
+            <h1 class="font-serif fs-1 fw-bold text-white mb-2">@v.Name</h1>
+            <p class="text-white-50 mb-0 max-w-700">@v.Address</p>
+        </div>
+    </div>
+
+    <div class="row g-5">
+        <div class="col-lg-8">
+            <!-- Short Description -->
+            <div class="lead text-secondary mb-4 fst-italic border-start border-4 border-warning ps-3">
+                @v.ShortDescription
+            </div>
+
+            <!-- History & Culture -->
+            <div class="mb-5">
+                <h3 class="font-serif fw-bold mb-3"><i class="bi bi-clock-history text-terracotta me-2"></i>Lịch sử & Hồn cốt văn hóa</h3>
+                <p class="text-secondary lh-lg" style="white-space: pre-line;">@v.HistoryDescription</p>
+            </div>
+
+            <!-- Craft Process -->
+            <div class="mb-5">
+                <h3 class="font-serif fw-bold mb-3"><i class="bi bi-gear-wide-connected text-bamboo me-2"></i>Quy trình làm nghề cổ truyền</h3>
+                <div class="bg-white rounded-4 p-4 shadow-sm border">
+                    <p class="text-secondary lh-lg mb-0" style="white-space: pre-line;">@v.CraftProcessDescription</p>
+                </div>
+            </div>
+
+            <!-- Workshops in this village -->
+            <div class="mb-5">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h3 class="font-serif fw-bold mb-0">Workshop tại @v.Name (@Model.Workshops.Count)</h3>
+                </div>
+
+                @if (!Model.Workshops.Any())
+                {
+                    <p class="text-muted small">Hiện chưa có workshop nào mở tại làng nghề này.</p>
+                }
+                else
+                {
+                    <div class="row g-4">
+                        @foreach (var ws in Model.Workshops)
+                        {
+                            <div class="col-md-6">
+                                <div class="craft-card">
+                                    <img src="@ws.CoverImageUrl" alt="@ws.Title" class="craft-card-img" />
+                                    <div class="p-3 d-flex flex-column flex-grow-1">
+                                        <h6 class="fw-bold mb-2">
+                                            <a asp-controller="Workshop" asp-action="Details" asp-route-id="@ws.Id" class="text-decoration-none text-dark">
+                                                @ws.Title
+                                            </a>
+                                        </h6>
+                                        <div class="d-flex justify-content-between align-items-center mt-auto pt-2 border-top">
+                                            <span class="price-tag fs-6">@ws.BasePrice.ToString("N0") đ</span>
+                                            <a asp-controller="Workshop" asp-action="Details" asp-route-id="@ws.Id" class="btn btn-sm btn-outline-primary">
+                                                Chi tiết
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+
+            <!-- Curated Trips for this village -->
+            @if (Model.Trips.Any())
+            {
+                <div class="mb-5">
+                    <h3 class="font-serif fw-bold mb-4">Chuyến đi gợi ý tại @v.Name</h3>
+                    <div class="d-flex flex-column gap-3">
+                        @foreach (var trip in Model.Trips)
+                        {
+                            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+                                <div class="row g-3 align-items-center">
+                                    <div class="col-md-4">
+                                        <img src="@trip.CoverImageUrl" alt="@trip.Title" class="rounded-3 w-100 object-fit-cover" style="height: 140px;" />
+                                    </div>
+                                    <div class="col-md-8">
+                                        <div class="d-flex justify-content-between mb-1">
+                                            <span class="badge bg-light text-muted small"><i class="bi bi-clock me-1"></i> @trip.DurationDescription</span>
+                                            <span class="fw-bold text-terracotta">~@trip.EstimatedCost.ToString("N0") đ</span>
+                                        </div>
+                                        <h6 class="fw-bold mb-1">@trip.Title</h6>
+                                        <p class="small text-muted mb-2 line-clamp-2">@trip.ShortDescription</p>
+                                        <a asp-controller="Trip" asp-action="Details" asp-route-slug="@trip.Slug" class="btn btn-sm btn-outline-primary">
+                                            Xem lịch trình <i class="bi bi-arrow-right ms-1"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Village Info Card -->
+            <div class="card border-0 shadow-sm rounded-4 p-4 sticky-top bg-white" style="top: 80px;">
+                <h5 class="fw-bold mb-3"><i class="bi bi-info-circle text-terracotta me-2"></i>Thông tin du khách</h5>
+                <ul class="list-unstyled small text-muted mb-4 d-flex flex-column gap-2">
+                    <li><strong class="text-dark"><i class="bi bi-pin-map me-1"></i> Địa chỉ:</strong> @v.Address</li>
+                    <li><strong class="text-dark"><i class="bi bi-calendar3 me-1"></i> Thời điểm lý tưởng:</strong> Quanh năm, đẹp nhất vào mùa thu và dịp lễ hội làng truyền thống.</li>
+                    <li><strong class="text-dark"><i class="bi bi-car-front me-1"></i> Phương tiện:</strong> Xe buýt, taxi, xe máy hoặc tour trọn gói.</li>
+                </ul>
+
+                <a asp-controller="Workshop" asp-action="Index" asp-route-villageId="@v.Id" class="btn btn-primary w-100 fw-bold py-2 mb-2">
+                    <i class="bi bi-search me-1"></i> Tìm Workshop tại làng này
+                </a>
+                <a asp-controller="Trip" asp-action="Index" class="btn btn-outline-primary w-100 fw-bold py-2">
+                    <i class="bi bi-map me-1"></i> Xem các chuyến đi kết hợp
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,46 @@
+@model List<CraftTrip.Core.Entities.Village>
+@{
+    ViewData["Title"] = "Làng nghề Truyền thống Việt Nam";
+}
+
+<div class="container py-4">
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index" class="text-decoration-none">Trang chủ</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Làng nghề</li>
+        </ol>
+    </nav>
+
+    <div class="text-center max-w-700 mx-auto mb-5">
+        <h1 class="font-serif fs-1 fw-bold mb-2">Bản đồ Làng nghề Truyền thống</h1>
+        <p class="text-muted">Hành trình tìm về những cái nôi di sản văn hóa, nơi tinh hoa thủ công được nuôi dưỡng qua hàng thế kỷ.</p>
+    </div>
+
+    <div class="row g-4">
+        @foreach (var village in Model)
+        {
+            <div class="col-lg-4 col-md-6">
+                <div class="craft-card">
+                    <div class="position-relative overflow-hidden">
+                        <img src="@village.CoverImageUrl" alt="@village.Name" class="craft-card-img" />
+                        <span class="position-absolute top-0 start-0 m-3 craft-badge-village">
+                            <i class="bi bi-geo-alt-fill me-1"></i> @village.Location
+                        </span>
+                    </div>
+                    <div class="p-4 d-flex flex-column flex-grow-1">
+                        <h4 class="font-serif fw-bold mb-2">@village.Name</h4>
+                        <p class="text-muted small mb-3 flex-grow-1 line-clamp-3">@village.ShortDescription</p>
+                        <div class="d-flex justify-content-between align-items-center pt-3 border-top mt-auto">
+                            <span class="small fw-semibold text-secondary">
+                                <i class="bi bi-shop me-1"></i> @village.Workshops.Count trải nghiệm
+                            </span>
+                            <a asp-action="Details" asp-route-slug="@village.Slug" class="btn btn-sm btn-outline-primary">
+                                Tìm hiểu làng <i class="bi bi-arrow-right ms-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

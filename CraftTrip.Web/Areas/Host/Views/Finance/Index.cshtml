@@ -1,0 +1,217 @@
+@model CraftTrip.Web.ViewModels.HostFinanceViewModel
+@using CraftTrip.Core.Entities
+@using CraftTrip.Core.Enums
+@using CraftTrip.Services.DTOs
+@{
+    ViewData["Title"] = "Doanh thu & Rút tiền";
+    var summary = Model?.Summary ?? (ViewBag.Summary as HostFinancialSummaryDto) ?? new HostFinancialSummaryDto();
+    var transactions = Model?.Transactions ?? (ViewBag.Transactions as List<HostWalletTransaction>) ?? new List<HostWalletTransaction>();
+    var payouts = Model?.Payouts ?? (ViewBag.Payouts as List<HostPayout>) ?? new List<HostPayout>();
+}
+
+<div class="host-container py-4">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+        <div>
+            <h1 class="h2 fw-bold text-dark mb-1">Ví doanh thu & Rút tiền</h1>
+            <p class="text-muted fs-6 mb-0">Theo dõi thu nhập từ các buổi trải nghiệm và yêu cầu chuyển tiền về tài khoản ngân hàng của xưởng</p>
+        </div>
+        <button type="button" class="btn btn-success btn-lg rounded-pill px-4 shadow" data-bs-toggle="modal" data-bs-target="#withdrawModal">
+            <i class="bi bi-wallet2 me-2"></i> Yêu cầu rút tiền về ngân hàng
+        </button>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show rounded-4 p-3 mb-4" role="alert">
+            <i class="bi bi-check-circle-fill me-2 fs-5"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show rounded-4 p-3 mb-4" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- 4 Thẻ tổng quan tài chính -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-6 col-xl-3">
+            <div class="card shadow-sm border-0 rounded-4 p-4 h-100 bg-primary text-white">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="fs-6 opacity-75">Khả dụng để rút</span>
+                    <i class="bi bi-cash-stack fs-3"></i>
+                </div>
+                <h2 class="fw-bold mb-0">@summary.AvailableBalance.ToString("N0") đ</h2>
+                <small class="opacity-75 mt-2 d-block">Có thể bấm rút tiền ngay</small>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-xl-3">
+            <div class="card shadow-sm border-0 rounded-4 p-4 h-100 bg-white">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="fs-6 text-muted">Đang chờ đủ 24h</span>
+                    <i class="bi bi-hourglass-split fs-3 text-warning"></i>
+                </div>
+                <h2 class="fw-bold text-warning mb-0">@summary.PendingBalance.ToString("N0") đ</h2>
+                <small class="text-muted mt-2 d-block">Sau buổi học 24h sẽ cộng vào ví</small>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-xl-3">
+            <div class="card shadow-sm border-0 rounded-4 p-4 h-100 bg-white">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="fs-6 text-muted">Tổng thực nhận (Net)</span>
+                    <i class="bi bi-graph-up-arrow fs-3 text-success"></i>
+                </div>
+                <h2 class="fw-bold text-success mb-0">@summary.TotalNet.ToString("N0") đ</h2>
+                <small class="text-muted mt-2 d-block">Đã trừ phí nền tảng</small>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-xl-3">
+            <div class="card shadow-sm border-0 rounded-4 p-4 h-100 bg-white">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="fs-6 text-muted">Tổng doanh thu vé (Gross)</span>
+                    <i class="bi bi-ticket-perforated fs-3 text-info"></i>
+                </div>
+                <h2 class="fw-bold text-dark mb-0">@summary.TotalGross.ToString("N0") đ</h2>
+                <small class="text-muted mt-2 d-block">Tổng tiền du khách đã trả</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bảng lịch sử biến động số dư và lệnh rút -->
+    <div class="row g-4">
+        <!-- Lịch sử giao dịch ví -->
+        <div class="col-lg-7">
+            <div class="card shadow-sm border-0 rounded-4 p-4">
+                <h4 class="fw-bold text-dark mb-3"><i class="bi bi-journal-text text-primary me-2"></i>Biến động số dư gần đây</h4>
+                @if (!transactions.Any())
+                {
+                    <div class="text-center py-4 text-muted">
+                        <i class="bi bi-clock-history fs-2 d-block mb-2"></i>
+                        Chưa có biến động số dư nào
+                    </div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0 fs-6">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Thời gian</th>
+                                    <th>Nội dung</th>
+                                    <th class="text-end">Số tiền</th>
+                                    <th class="text-end">Số dư sau GD</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var t in transactions)
+                                {
+                                    <tr>
+                                        <td>
+                                            <div>@t.CreatedAt.ToString("HH:mm")</div>
+                                            <small class="text-muted">@t.CreatedAt.ToString("dd/MM/yyyy")</small>
+                                        </td>
+                                        <td>
+                                            <div class="fw-semibold">@t.Description</div>
+                                            <small class="text-muted font-monospace">Mã GD: @t.Id.ToString("N")[..8]</small>
+                                        </td>
+                                        <td class="text-end fw-bold @(t.Amount >= 0 ? "text-success" : "text-danger")">
+                                            @(t.Amount >= 0 ? "+" : "")@t.Amount.ToString("N0") đ
+                                        </td>
+                                        <td class="text-end text-muted font-monospace">
+                                            @t.BalanceAfter.ToString("N0") đ
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Các khoản thanh toán từ các buổi trải nghiệm -->
+        <div class="col-lg-5">
+            <div class="card shadow-sm border-0 rounded-4 p-4">
+                <h4 class="fw-bold text-dark mb-3"><i class="bi bi-shield-check text-primary me-2"></i>Khoản kết chuyển (Payout)</h4>
+                @if (!payouts.Any())
+                {
+                    <div class="text-center py-4 text-muted">
+                        <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+                        Chưa có lịch sử kết chuyển
+                    </div>
+                }
+                else
+                {
+                    <div class="list-group list-group-flush gap-2">
+                        @foreach (var p in payouts)
+                        {
+                            <div class="list-group-item p-3 border rounded-3 bg-light">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <strong class="font-monospace text-primary">@(p.PayoutReference ?? p.Id.ToString("N")[..8])</strong>
+                                    <span class="badge @(p.Status == PayoutStatus.Transferred ? "bg-success" : "bg-warning text-dark") rounded-pill">
+                                        @p.Status
+                                    </span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">Đơn: @p.Booking?.BookingCode</small>
+                                    <span class="fw-bold text-success fs-6">+@p.Amount.ToString("N0") đ</span>
+                                </div>
+                                <small class="text-muted d-block mt-1">Đủ điều kiện: @p.EligibleAt.ToString("HH:mm dd/MM/yyyy")</small>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Rút Tiền -->
+<div class="modal fade" id="withdrawModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold fs-5">Rút tiền về tài khoản ngân hàng</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form asp-action="Withdraw" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-body pt-3">
+                    <p class="text-muted fs-6 mb-3">
+                        Số dư khả dụng hiện tại: <strong class="text-success fs-5">@summary.AvailableBalance.ToString("N0") đ</strong>
+                    </p>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold fs-6">Số tiền muốn rút (VNĐ)</label>
+                        <div class="input-group input-group-lg">
+                            <input name="amount" type="number" min="50000" max="@summary.AvailableBalance" step="10000" 
+                                   class="form-control fs-4 fw-bold text-primary" placeholder="500000" required />
+                            <span class="input-group-text">đ</span>
+                        </div>
+                        <small class="text-muted">Tối thiểu 50.000 đ mỗi lần rút.</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold fs-6">Ghi chú (tùy chọn)</label>
+                        <input name="note" class="form-control" placeholder="Rút tiền chi trả nguyên vật liệu..." />
+                    </div>
+
+                    <div class="alert alert-info small rounded-3 mb-0">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Tiền sẽ được chuyển tới tài khoản ngân hàng đã đăng ký trong mục <strong>Hồ sơ cơ sở</strong> của bác.
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-success btn-lg rounded-pill px-4 shadow">Xác nhận rút</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

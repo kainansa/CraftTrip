@@ -1,0 +1,90 @@
+@model CraftTrip.Web.ViewModels.TripDetailViewModel
+@{
+    var trip = Model.Trip;
+    ViewData["Title"] = trip.Title;
+}
+
+<div class="container py-4">
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index" class="text-decoration-none">Trang chủ</a></li>
+            <li class="breadcrumb-item"><a asp-controller="Trip" asp-action="Index" class="text-decoration-none">Chuyến đi</a></li>
+            <li class="breadcrumb-item active text-truncate" style="max-width: 300px;" aria-current="page">@trip.Title</li>
+        </ol>
+    </nav>
+
+    <!-- Trip Header Banner -->
+    <div class="rounded-5 overflow-hidden position-relative mb-5 shadow-sm" style="height: 360px;">
+        <img src="@trip.CoverImageUrl" alt="@trip.Title" class="w-100 h-100 object-fit-cover" />
+        <div class="position-absolute inset-0 bg-dark bg-opacity-50 d-flex flex-column justify-content-end p-4 p-md-5 text-white">
+            <span class="badge bg-warning text-dark px-3 py-1 rounded-pill fw-bold mb-2 align-self-start">
+                <i class="bi bi-clock me-1"></i> @trip.DurationDescription
+            </span>
+            <h1 class="font-serif fs-1 fw-bold text-white mb-2">@trip.Title</h1>
+            <p class="text-white-50 mb-0 max-w-700">@(trip.Village?.Name ?? "Làng nghề truyền thống Việt Nam")</p>
+        </div>
+    </div>
+
+    <div class="row g-5">
+        <!-- Left: Interactive Timeline -->
+        <div class="col-lg-8">
+            <div class="lead text-secondary mb-4 fst-italic">
+                @trip.FullDescription
+            </div>
+
+            <h3 class="font-serif fw-bold mb-4">
+                <i class="bi bi-signpost-2 text-terracotta me-2"></i>Dòng thời gian lịch trình
+            </h3>
+
+            <div class="trip-timeline">
+                @foreach (var stop in trip.Itineraries.OrderBy(i => i.StopOrder))
+                {
+                    <div class="timeline-item">
+                        <div class="timeline-dot">
+                            @stop.StopOrder
+                        </div>
+                        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="badge bg-light text-dark fw-bold border">
+                                    <i class="bi bi-alarm me-1 text-terracotta"></i> @stop.TimeSlot
+                                </span>
+                                <span class="small text-muted"><i class="bi bi-geo-alt text-danger me-1"></i> @stop.LocationName</span>
+                            </div>
+                            <h5 class="fw-bold mb-2">@stop.Title</h5>
+                            <p class="small text-muted mb-0">@stop.Description</p>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Right: Linked Workshop Booking Card -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 p-4 sticky-top bg-white" style="top: 80px;">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="text-muted small">Chi phí ước tính:</span>
+                    <span class="price-tag fs-4">~@trip.EstimatedCost.ToString("N0") đ</span>
+                </div>
+
+                @if (trip.Workshop != null)
+                {
+                    <div class="border rounded-3 p-3 bg-light mb-3">
+                        <span class="badge bg-gold text-dark mb-1 small fw-bold">Workshop trọng tâm trong chuyến đi</span>
+                        <h6 class="fw-bold mb-2 text-dark">@trip.Workshop.Title</h6>
+                        <div class="small text-muted mb-2">
+                            <i class="bi bi-clock me-1"></i> @trip.Workshop.DurationMinutes phút • @trip.Workshop.BasePrice.ToString("N0") đ/khách
+                        </div>
+                        <a asp-controller="Workshop" asp-action="Details" asp-route-id="@trip.Workshop.Id" class="btn btn-primary btn-sm w-100 fw-bold">
+                            Xem & Đặt vé Workshop này <i class="bi bi-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                }
+
+                <div class="small text-muted">
+                    <p class="mb-2"><i class="bi bi-info-circle text-terracotta me-1"></i> Lịch trình gợi ý hoàn toàn miễn phí tham khảo.</p>
+                    <p class="mb-0"><i class="bi bi-shield-check text-bamboo me-1"></i> Bạn có thể linh hoạt điều chỉnh điểm dừng và thời gian ăn uống tùy theo nhu cầu cá nhân.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

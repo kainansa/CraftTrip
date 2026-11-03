@@ -1,0 +1,121 @@
+@model List<CraftTrip.Core.Entities.Booking>
+@using CraftTrip.Core.Enums
+@{
+    ViewData["Title"] = "Khách đặt chỗ";
+}
+
+<div class="host-container py-4">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+        <div>
+            <h1 class="h2 fw-bold text-dark mb-1">Danh sách khách đặt chỗ</h1>
+            <p class="text-muted fs-6 mb-0">Theo dõi thông tin và số lượng khách du lịch đã đăng ký trải nghiệm tại xưởng của bác</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a asp-action="CheckIn" class="btn btn-primary btn-lg rounded-pill px-4 shadow-sm">
+                <i class="bi bi-qr-code-scan me-2"></i> Quét mã / Điểm danh khách
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show rounded-4 p-3 mb-4" role="alert">
+            <i class="bi bi-check-circle-fill me-2 fs-5"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
+        <div class="card-header bg-white py-3 px-4 border-bottom">
+            <div class="row align-items-center">
+                <div class="col">
+                    <span class="fs-6 fw-bold text-dark">Tổng cộng: @Model.Count đơn đặt chỗ</span>
+                </div>
+            </div>
+        </div>
+
+        @if (!Model.Any())
+        {
+            <div class="text-center py-5">
+                <i class="bi bi-people text-muted" style="font-size: 3.5rem;"></i>
+                <h5 class="fw-bold mt-3 text-secondary">Chưa có khách đặt chỗ nào</h5>
+                <p class="text-muted fs-6 mb-0">Khi có du khách đặt vé trải nghiệm, danh sách sẽ hiển thị đầy đủ tại đây.</p>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 fs-6">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4">Mã đơn</th>
+                            <th>Trải nghiệm</th>
+                            <th>Ngày & Giờ</th>
+                            <th>Khách hàng</th>
+                            <th class="text-center">Số vé</th>
+                            <th class="text-end">Thực nhận</th>
+                            <th class="text-center">Trạng thái</th>
+                            <th class="text-center pe-4">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var b in Model)
+                        {
+                            <tr>
+                                <td class="ps-4 font-monospace fw-bold text-primary">
+                                    @b.BookingCode
+                                </td>
+                                <td>
+                                    <div class="fw-semibold text-truncate" style="max-width: 250px;">
+                                        @b.Slot?.Schedule?.Workshop?.Title
+                                    </div>
+                                </td>
+                                <td>
+                                    <div><i class="bi bi-calendar3 me-1 text-muted"></i>@b.Slot?.Schedule?.Date.ToString("dd/MM/yyyy")</div>
+                                    <small class="text-muted"><i class="bi bi-clock me-1"></i>@b.Slot?.StartTime.ToString(@"hh\:mm") - @b.Slot?.EndTime.ToString(@"hh\:mm")</small>
+                                </td>
+                                <td>
+                                    <div class="fw-bold">@b.CustomerName</div>
+                                    <small class="text-muted">@b.CustomerPhone</small>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge bg-light text-dark border px-3 py-2 fs-6 rounded-pill">
+                                        @b.Quantity người
+                                    </span>
+                                </td>
+                                <td class="text-end fw-bold text-success">
+                                    @b.HostEarnings.ToString("N0") đ
+                                </td>
+                                <td class="text-center">
+                                    @switch (b.Status)
+                                    {
+                                        case BookingStatus.Pending:
+                                            <span class="badge bg-warning text-dark px-3 py-2 rounded-pill">Chờ thanh toán</span>
+                                            break;
+                                        case BookingStatus.Confirmed:
+                                            <span class="badge bg-primary px-3 py-2 rounded-pill">Đã xác nhận</span>
+                                            break;
+                                        case BookingStatus.Completed:
+                                            <span class="badge bg-success px-3 py-2 rounded-pill">Đã hoàn thành</span>
+                                            break;
+                                        case BookingStatus.Canceled:
+                                            <span class="badge bg-danger px-3 py-2 rounded-pill">Đã hủy</span>
+                                            break;
+                                        default:
+                                            <span class="badge bg-secondary px-3 py-2 rounded-pill">@b.Status</span>
+                                            break;
+                                    }
+                                </td>
+                                <td class="text-center pe-4">
+                                    <a asp-action="Details" asp-route-id="@b.Id" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                                        Chi tiết
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@(ViewData["Title"] != null ? $"{ViewData["Title"]} — Cổng Nghệ Nhân CraftTrip" : "Kênh Quản Lý Cơ Sở Thủ Công — CraftTrip")</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <style>
+        body {
+            font-size: 16px;
+            background-color: #F8F5EE;
+        }
+        .host-nav-item {
+            font-size: 1.05rem;
+            font-weight: 600;
+            padding: 0.65rem 1rem !important;
+            border-radius: 8px;
+        }
+        .host-nav-item:hover, .host-nav-item.active {
+            background-color: rgba(107, 78, 49, 0.1);
+            color: var(--ct-wood);
+        }
+    </style>
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body class="host-body">
+    <header class="bg-white border-bottom shadow-sm sticky-top">
+        <div class="container py-2 d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-3">
+                <a asp-area="Host" asp-controller="Dashboard" asp-action="Index" class="navbar-brand text-decoration-none text-dark fw-bold d-flex align-items-center gap-2">
+                    <span class="badge bg-warning text-dark p-2 fs-6 rounded-circle"><i class="bi bi-hammer"></i></span>
+                    <div>
+                        <div class="lh-1 fs-5 fw-bold text-wood">Kênh Quản Lý Cơ Sở</div>
+                        <small class="text-muted fs-6">Dành cho Nghệ nhân & Chủ xưởng</small>
+                    </div>
+                </a>
+            </div>
+
+            <div class="d-flex align-items-center gap-3">
+                <a asp-area="" asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary btn-sm d-none d-md-inline-flex align-items-center gap-1">
+                    <i class="bi bi-arrow-left"></i> Xem sàn CraftTrip
+                </a>
+                <div class="dropdown">
+                    <button class="btn btn-outline-dark dropdown-toggle py-2 px-3 fw-semibold rounded-pill" type="button" data-bs-toggle="dropdown">
+                        <i class="bi bi-person-circle me-1"></i> @User.Identity?.Name
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
+                        <li><a class="dropdown-item py-2" asp-area="Host" asp-controller="Profile" asp-action="Index"><i class="bi bi-gear me-2"></i> Hồ sơ cơ sở</a></li>
+                        <li><a class="dropdown-item py-2" asp-area="" asp-controller="Home" asp-action="Index"><i class="bi bi-globe me-2"></i> Ra trang chủ khách</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <form asp-area="" asp-controller="Account" asp-action="Logout" method="post">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="dropdown-item py-2 text-danger fw-bold">
+                                    <i class="bi bi-box-arrow-right me-2"></i> Đăng xuất
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Host Navigation Bar -->
+        <div class="bg-light border-top border-bottom">
+            <div class="container overflow-x-auto py-1">
+                <ul class="nav nav-pills flex-nowrap gap-1">
+                    <li class="nav-item">
+                        <a class="nav-link host-nav-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Dashboard" ? "active" : "")" asp-area="Host" asp-controller="Dashboard" asp-action="Index">
+                            <i class="bi bi-speedometer2 me-1"></i> Tổng quan
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link host-nav-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Workshop" ? "active" : "")" asp-area="Host" asp-controller="Workshop" asp-action="Index">
+                            <i class="bi bi-palette me-1"></i> Workshop của tôi
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link host-nav-item text-success fw-bold" asp-area="Host" asp-controller="Workshop" asp-action="Create">
+                            <i class="bi bi-plus-circle me-1"></i> Đăng Workshop mới
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link host-nav-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Booking" && ViewContext.RouteData.Values["action"]?.ToString() == "CheckIn" ? "active" : "")" asp-area="Host" asp-controller="Booking" asp-action="CheckIn">
+                            <i class="bi bi-qr-code-scan me-1 text-danger"></i> Quét vé QR Check-in
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link host-nav-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Booking" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")" asp-area="Host" asp-controller="Booking" asp-action="Index">
+                            <i class="bi bi-people me-1"></i> Khách đặt chỗ
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link host-nav-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Finance" ? "active" : "")" asp-area="Host" asp-controller="Finance" asp-action="Index">
+                            <i class="bi bi-cash-stack me-1"></i> Doanh thu & Rút tiền
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link host-nav-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Profile" ? "active" : "")" asp-area="Host" asp-controller="Profile" asp-action="Index">
+                            <i class="bi bi-shop me-1"></i> Hồ sơ xưởng
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </header>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="container mt-3">
+            <div class="alert alert-success alert-dismissible fade show shadow-sm border-0 d-flex align-items-center fs-6" role="alert">
+                <i class="bi bi-check-circle-fill me-2 fs-4"></i>
+                <div class="fw-medium">@TempData["SuccessMessage"]</div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="container mt-3">
+            <div class="alert alert-danger alert-dismissible fade show shadow-sm border-0 d-flex align-items-center fs-6" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2 fs-4"></i>
+                <div class="fw-medium">@TempData["ErrorMessage"]</div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+    }
+
+    <main class="container py-4">
+        @RenderBody()
+    </main>
+
+    <footer class="bg-white border-top py-4 mt-5 text-center text-muted small">
+        <div class="container">
+            <p class="mb-1">Hệ thống hỗ trợ Nghệ nhân CraftTrip — Hotline trợ giúp: <strong>1900 6868</strong></p>
+            <p class="mb-0">© 2026 CraftTrip. Tinh hoa Làng nghề Việt.</p>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

@@ -1,0 +1,63 @@
+@model CraftTrip.Web.ViewModels.AdminSectionEditViewModel
+@{
+    ViewData["Title"] = "Chỉnh sửa Mục nội dung: " + Model.SectionKey;
+}
+
+<div class="admin-container py-4">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <a asp-action="Index" class="btn btn-outline-secondary btn-sm rounded-pill px-3 mb-2">
+                <i class="bi bi-arrow-left me-1"></i> Quay lại CMS
+            </a>
+            <h1 class="h2 fw-bold text-dark mb-0">Chỉnh sửa Mục Website: @Model.SectionKey</h1>
+            <p class="text-muted fs-6 mb-0">Trang: <strong>@Model.PageKey</strong></p>
+        </div>
+    </div>
+
+    <form asp-action="EditSection" method="post" class="card shadow-sm border-0 rounded-4 p-4 p-md-5">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="SectionId" />
+        <input type="hidden" asp-for="SectionKey" />
+        <input type="hidden" asp-for="PageKey" />
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-4"></div>
+
+        <div class="row g-4">
+            <div class="col-12">
+                <label asp-for="Title" class="form-label fw-semibold fs-6">Tiêu đề chính <span class="text-danger">*</span></label>
+                <input asp-for="Title" class="form-control form-control-lg fs-6" required />
+                <span asp-validation-for="Title" class="text-danger small"></span>
+            </div>
+
+            <div class="col-12">
+                <label asp-for="Subtitle" class="form-label fw-semibold fs-6">Tiêu đề phụ / Mô tả dẫn nhập</label>
+                <textarea asp-for="Subtitle" class="form-control fs-6" rows="3"></textarea>
+            </div>
+
+            <div class="col-12">
+                <label asp-for="ContentHtml" class="form-label fw-semibold fs-6">Nội dung chi tiết (HTML hoặc văn bản)</label>
+                <textarea asp-for="ContentHtml" class="form-control font-monospace fs-6" rows="6"></textarea>
+            </div>
+
+            <div class="col-12">
+                <label asp-for="BackgroundImageUrl" class="form-label fw-semibold fs-6">Link ảnh nền / Banner (URL)</label>
+                <input asp-for="BackgroundImageUrl" class="form-control form-control-lg fs-6" placeholder="https://..." />
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="PrimaryCtaText" class="form-label fw-semibold fs-6">Nút bấm chính: Chữ hiển thị</label>
+                <input asp-for="PrimaryCtaText" class="form-control form-control-lg fs-6" placeholder="Ví dụ: Khám phá ngay" />
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="PrimaryCtaUrl" class="form-label fw-semibold fs-6">Nút bấm chính: Đường dẫn (URL / Route)</label>
+                <input asp-for="PrimaryCtaUrl" class="form-control form-control-lg fs-6" placeholder="Ví dụ: /Workshop" />
+            </div>
+
+            <div class="col-12 pt-3">
+                <button type="submit" class="btn btn-primary btn-lg rounded-pill px-5 shadow">
+                    <i class="bi bi-check-circle-fill me-2"></i> Lưu cập nhật Nội dung
+                </button>
+            </div>
+        </div>
+    </form>
+</div>

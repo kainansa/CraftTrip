@@ -1,0 +1,157 @@
+@model CraftTrip.Web.ViewModels.GuestTicketListViewModel
+@{
+    ViewData["Title"] = "Vé trải nghiệm của tôi";
+}
+
+<div class="container py-4">
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index" class="text-decoration-none">Trang chủ</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Vé của tôi</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <h2 class="font-serif fw-bold mb-1">Vé trải nghiệm & Mã QR của tôi</h2>
+            <p class="text-muted small mb-0">Quản lý vé điện tử, xuất trình mã QR điểm danh khi đến xưởng và theo dõi trạng thái tham gia</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a asp-action="History" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                <i class="bi bi-clock-history me-1"></i> Tất cả đơn đặt chỗ
+            </a>
+            <a asp-controller="Workshop" asp-action="Index" class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm">
+                <i class="bi bi-plus me-1"></i> Đặt thêm workshop
+            </a>
+        </div>
+    </div>
+
+    <!-- Quick Metrics -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+                <span class="text-muted small d-block mb-1">Vé có hiệu lực</span>
+                <h4 class="fw-bold text-success mb-0">@Model.ActiveTicketsCount</h4>
+                <small class="text-muted mt-1 d-block"><i class="bi bi-qr-code me-1"></i> Sẵn sàng check-in</small>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+                <span class="text-muted small d-block mb-1">Đã tham gia</span>
+                <h4 class="fw-bold text-primary mb-0">@Model.UsedTicketsCount</h4>
+                <small class="text-muted mt-1 d-block"><i class="bi bi-check2-all me-1"></i> Đã điểm danh / xong</small>
+            </div>
+        </div>
+        <div class="col-12 col-md-6">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-light d-flex flex-row align-items-center justify-content-between h-100">
+                <div class="d-flex align-items-center gap-3">
+                    <i class="bi bi-shield-check text-primary fs-2"></i>
+                    <div>
+                        <strong class="d-block text-dark small">Bảo đảm vé điện tử CraftTrip</strong>
+                        <span class="text-muted small">Mỗi vé có mã định danh và QR code độc bản để bảo vệ quyền lợi của bạn.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (!Model.Tickets.Any())
+    {
+        <div class="card border-0 shadow-sm rounded-4 p-5 text-center bg-white my-4">
+            <div class="d-inline-flex p-3 bg-light rounded-circle mx-auto mb-3 text-muted">
+                <i class="bi bi-ticket-perforated fs-1"></i>
+            </div>
+            <h5 class="fw-bold mb-1">Bạn chưa có vé trải nghiệm nào</h5>
+            <p class="text-muted small mb-4">Khám phá các Workshop và bắt đầu hành trình trải nghiệm làng nghề Việt Nam.</p>
+            <a asp-controller="Workshop" asp-action="Index" class="btn btn-primary rounded-pill px-4 mx-auto shadow-sm">
+                <i class="bi bi-compass me-1"></i> Khám phá Workshop
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var t in Model.Tickets)
+            {
+                <div class="col-lg-6">
+                    <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100 bg-white">
+                        <div class="card-header border-0 p-3 bg-wood text-white d-flex justify-content-between align-items-center" style="background-color: var(--ct-wood, #6b3e26);">
+                            <div>
+                                <span class="badge bg-warning text-dark fw-bold small">VÉ ĐIỆN TỬ</span>
+                                <span class="font-monospace ms-2 small fw-bold">@t.TicketCode</span>
+                            </div>
+                            <div>
+                                @if (t.AttendanceStatus == AttendanceStatus.CheckedIn)
+                                {
+                                    <span class="badge bg-success rounded-pill px-3 py-1">ĐÃ ĐIỂM DANH</span>
+                                }
+                                else if (t.BookingStatus == BookingStatus.Confirmed)
+                                {
+                                    <span class="badge bg-light text-dark rounded-pill px-3 py-1">ĐÃ XÁC NHẬN</span>
+                                }
+                                else if (t.BookingStatus == BookingStatus.Completed)
+                                {
+                                    <span class="badge bg-primary rounded-pill px-3 py-1">HOÀN THÀNH</span>
+                                }
+                                else if (t.BookingStatus == BookingStatus.Canceled)
+                                {
+                                    <span class="badge bg-danger rounded-pill px-3 py-1">ĐÃ HỦY</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary rounded-pill px-3 py-1">@t.BookingStatus</span>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="card-body p-4 d-flex flex-column justify-content-between">
+                            <div class="d-flex gap-3 mb-3 pb-3 border-bottom">
+                                <img src="@(t.WorkshopCoverImage ?? "https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?auto=format&fit=crop&w=300&q=80")"
+                                     alt="@t.WorkshopTitle" class="rounded-3 object-fit-cover shadow-sm flex-shrink-0" style="width: 100px; height: 100px;" />
+                                <div>
+                                    <span class="badge bg-light text-muted small"><i class="bi bi-geo-alt me-1 text-danger"></i>@t.VillageName</span>
+                                    <h5 class="fw-bold mb-1 mt-1">@t.WorkshopTitle</h5>
+                                    <small class="text-muted d-block"><i class="bi bi-pin-map me-1"></i>@t.WorkshopAddress</small>
+                                </div>
+                            </div>
+
+                            <div class="row align-items-center g-3 mb-3">
+                                <div class="col-sm-7">
+                                    <div class="small text-muted d-flex flex-column gap-1">
+                                        <div><i class="bi bi-calendar3 me-1 text-muted"></i> Ngày: <strong class="text-dark">@t.SessionDate.ToString("dddd, dd/MM/yyyy", new System.Globalization.CultureInfo("vi-VN"))</strong></div>
+                                        <div><i class="bi bi-clock me-1 text-muted"></i> Giờ: <strong class="text-dark">@t.StartTime.ToString(@"hh\:mm") - @t.EndTime.ToString(@"hh\:mm")</strong></div>
+                                        <div><i class="bi bi-people me-1 text-muted"></i> Số khách: <strong class="text-dark">@t.Quantity người</strong></div>
+                                        <div><i class="bi bi-cash-stack me-1 text-muted"></i> Đã thanh toán: <strong class="text-primary">@t.TotalAmount.ToString("N0") đ</strong></div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-5 text-center">
+                                    @if (!string.IsNullOrEmpty(t.QrCodeData))
+                                    {
+                                        <div class="p-2 bg-light rounded-3 border d-inline-block shadow-xs">
+                                            <img src="@t.QrCodeData" alt="QR Vé" style="width: 100px; height: 100px;" />
+                                        </div>
+                                        <small class="text-muted d-block mt-1 font-monospace" style="font-size: 11px;">Mã đơn: @t.BookingCode</small>
+                                    }
+                                </div>
+                            </div>
+
+                            <div class="d-flex flex-wrap gap-2 pt-2 border-top justify-content-between align-items-center">
+                                <div>
+                                    @if (t.CanCancel)
+                                    {
+                                        <a asp-action="Cancel" asp-route-id="@t.BookingId" class="btn btn-outline-danger btn-sm rounded-pill px-3">
+                                            <i class="bi bi-x-circle me-1"></i> Hủy vé (Hoàn 100%)
+                                        </a>
+                                    }
+                                </div>
+                                <a asp-action="Details" asp-route-id="@t.BookingId" class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm">
+                                    <i class="bi bi-qr-code me-1"></i> Xem chi tiết & Mã QR lớn
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

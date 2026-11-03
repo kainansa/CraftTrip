@@ -1,0 +1,127 @@
+@model CraftTrip.Web.ViewModels.HostCheckInViewModel
+@{
+    ViewData["Title"] = "Điểm danh khách đến xưởng";
+}
+
+<div class="host-container py-4">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+        <div>
+            <a asp-action="Index" class="btn btn-outline-secondary btn-sm mb-2 rounded-pill px-3">
+                <i class="bi bi-arrow-left me-1"></i> Danh sách đặt chỗ
+            </a>
+            <h1 class="h2 fw-bold text-dark mb-1">Điểm danh & Soát vé khách</h1>
+            <p class="text-muted fs-6 mb-0">Quét mã QR hoặc nhập mã vé trên vé điện tử của khách khi họ tới cơ sở trải nghiệm</p>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.StatusMessage))
+    {
+        <div class="alert @(Model.IsSuccess ? "alert-success" : "alert-danger") alert-dismissible fade show rounded-4 p-4 mb-4 shadow-sm" role="alert">
+            <div class="d-flex align-items-center gap-3">
+                <i class="bi @(Model.IsSuccess ? "bi-check-circle-fill text-success" : "bi-x-circle-fill text-danger") fs-1"></i>
+                <div>
+                    <h5 class="alert-heading fw-bold mb-1">@(Model.IsSuccess ? "Điểm danh thành công!" : "Không thể điểm danh vé")</h5>
+                    <p class="mb-0 fs-6">@Model.StatusMessage</p>
+                </div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="row g-4">
+        <!-- Form nhập / quét mã vé -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0 rounded-4 p-4 p-md-5">
+                <h4 class="fw-bold text-dark mb-3"><i class="bi bi-upc-scan text-primary me-2"></i>Nhập mã hoặc quét vé</h4>
+                <p class="text-muted fs-6 mb-4">Bác có thể dùng camera điện thoại/máy quét để quét mã QR, hoặc gõ trực tiếp 10 ký tự mã vé của khách.</p>
+
+                <form asp-action="CheckIn" method="post">
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <div class="mb-4">
+                        <label asp-for="TicketCode" class="form-label fw-bold fs-5">Mã vé khách trình diện</label>
+                        <input asp-for="TicketCode" class="form-control form-control-lg fs-4 font-monospace text-center py-3 border-2 text-uppercase" 
+                               placeholder="VD: CT-ABCD1234" autofocus autocomplete="off" />
+                        <span asp-validation-for="TicketCode" class="text-danger small"></span>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg w-100 py-3 fs-5 fw-bold rounded-4 shadow">
+                        <i class="bi bi-check-lg me-2"></i> Xác nhận đón khách
+                    </button>
+                </form>
+
+                <div class="mt-4 p-3 bg-light rounded-3 small text-muted">
+                    <i class="bi bi-lightbulb me-1 text-warning"></i>
+                    <strong>Mẹo cho bác:</strong> Nếu khách xuất trình hình ảnh vé QR trên điện thoại, bác chỉ cần dùng máy quét hướng vào mã QR, ô mã vé trên sẽ tự động điền và bấm xác nhận.
+                </div>
+            </div>
+        </div>
+
+        <!-- Thông tin đơn nếu điểm danh thành công -->
+        <div class="col-lg-6">
+            @if (Model.CheckedInBooking != null)
+            {
+                <div class="card shadow-sm border-0 rounded-4 p-4 border-start border-success border-4">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <h4 class="fw-bold text-success mb-0"><i class="bi bi-person-check-fill me-2"></i>Thông tin đón tiếp</h4>
+                        <span class="badge bg-success px-3 py-2 fs-6 rounded-pill">Hợp lệ</span>
+                    </div>
+
+                    <div class="p-3 bg-light rounded-3 mb-3">
+                        <h5 class="fw-bold mb-1">@Model.CheckedInBooking.Slot?.Schedule?.Workshop?.Title</h5>
+                        <div class="text-muted small">Mã đơn: <span class="font-monospace fw-bold">@Model.CheckedInBooking.BookingCode</span></div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-6">
+                            <div class="border p-3 rounded-3">
+                                <small class="text-muted d-block">Tên khách đại diện:</small>
+                                <strong class="fs-6">@Model.CheckedInBooking.CustomerName</strong>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="border p-3 rounded-3">
+                                <small class="text-muted d-block">Số lượng tham gia:</small>
+                                <strong class="fs-5 text-primary">@Model.CheckedInBooking.Quantity người</strong>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="border p-3 rounded-3">
+                                <small class="text-muted d-block">Số điện thoại:</small>
+                                <strong class="fs-6">@Model.CheckedInBooking.CustomerPhone</strong>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="border p-3 rounded-3">
+                                <small class="text-muted d-block">Khung giờ:</small>
+                                <strong class="fs-6">@Model.CheckedInBooking.Slot?.StartTime.ToString(@"hh\:mm") - @Model.CheckedInBooking.Slot?.EndTime.ToString(@"hh\:mm")</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(Model.CheckedInBooking.SpecialNotes))
+                    {
+                        <div class="p-3 bg-warning-subtle text-warning-emphasis rounded-3 mb-3 small">
+                            <strong>Ghi chú từ khách:</strong> "@Model.CheckedInBooking.SpecialNotes"
+                        </div>
+                    }
+
+                    <div class="d-grid">
+                        <a asp-action="CheckIn" class="btn btn-outline-primary btn-lg rounded-pill py-2">
+                            <i class="bi bi-plus me-1"></i> Soát vé tiếp theo
+                        </a>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="card shadow-sm border-0 rounded-4 p-5 text-center text-muted bg-light">
+                    <i class="bi bi-qr-code text-secondary opacity-50 mb-3" style="font-size: 4rem;"></i>
+                    <h5 class="fw-bold">Chưa có thông tin soát vé</h5>
+                    <p class="mb-0 fs-6">Sau khi bác quét hoặc nhập mã vé thành công, tên khách và số lượng người sẽ hiển thị rõ tại đây.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>

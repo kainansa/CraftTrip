@@ -1,0 +1,105 @@
+@model List<CraftTrip.Core.Entities.HostProfile>
+@using CraftTrip.Core.Enums
+@{
+    ViewData["Title"] = "Xác thực Hồ sơ Nghệ nhân & Xưởng";
+}
+
+<div class="admin-container py-4">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+        <div>
+            <a asp-action="Index" class="btn btn-outline-secondary btn-sm rounded-pill px-3 mb-2">
+                <i class="bi bi-arrow-left me-1"></i> Danh sách tất cả người dùng
+            </a>
+            <h1 class="h2 fw-bold text-dark mb-0">Hồ sơ Đối tác Nghệ nhân & Cơ sở sản xuất</h1>
+            <p class="text-muted fs-6 mb-0">Kiểm tra thông tin xưởng, CCCD và số tài khoản ngân hàng để phê duyệt đối tác</p>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show rounded-4 p-3 mb-4" role="alert">
+            <i class="bi bi-check-circle-fill me-2 fs-5"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 fs-6">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Tên xưởng & Nghệ nhân</th>
+                        <th>Nghề thủ công</th>
+                        <th>Làng nghề & Địa chỉ</th>
+                        <th>Thông tin Ngân hàng</th>
+                        <th class="text-center">Trạng thái</th>
+                        <th class="text-center pe-4">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var h in Model)
+                    {
+                        <tr>
+                            <td class="ps-4">
+                                <div class="fw-bold text-dark">@h.StudioName</div>
+                                <small class="text-muted">Chủ xưởng: @h.User?.FullName (CCCD: @h.IdCardNumber)</small>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-dark border">@h.CraftType</span>
+                            </td>
+                            <td>
+                                <div>@h.Village?.Name</div>
+                                <small class="text-muted d-block text-truncate" style="max-width: 250px;">@h.Address</small>
+                            </td>
+                            <td>
+                                <div class="fw-bold">@h.BankName</div>
+                                <small class="text-muted font-monospace">STK: @h.BankAccountNumber (@h.BankAccountName)</small>
+                            </td>
+                            <td class="text-center">
+                                @switch (h.VerificationStatus)
+                                {
+                                    case HostVerificationStatus.Verified:
+                                        <span class="badge bg-success rounded-pill px-3 py-2">Đã xác thực</span>
+                                        break;
+                                    case HostVerificationStatus.Pending:
+                                        <span class="badge bg-warning text-dark rounded-pill px-3 py-2">Chờ duyệt</span>
+                                        break;
+                                    case HostVerificationStatus.Rejected:
+                                        <span class="badge bg-danger rounded-pill px-3 py-2">Từ chối</span>
+                                        break;
+                                }
+                            </td>
+                            <td class="text-center pe-4">
+                                @if (h.VerificationStatus == HostVerificationStatus.Pending)
+                                {
+                                    <div class="d-flex justify-content-center gap-2">
+                                        <form asp-action="VerifyHost" method="post">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="hostProfileId" value="@h.Id" />
+                                            <input type="hidden" name="isApproved" value="true" />
+                                            <button type="submit" class="btn btn-success btn-sm rounded-pill px-3">
+                                                <i class="bi bi-check-lg me-1"></i> Phê duyệt
+                                            </button>
+                                        </form>
+                                        <form asp-action="VerifyHost" method="post">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="hostProfileId" value="@h.Id" />
+                                            <input type="hidden" name="isApproved" value="false" />
+                                            <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3" onclick="return confirm('Từ chối xác thực hồ sơ này?');">
+                                                <i class="bi bi-x-lg me-1"></i> Từ chối
+                                            </button>
+                                        </form>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <span class="text-muted small">Đã xử lý</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

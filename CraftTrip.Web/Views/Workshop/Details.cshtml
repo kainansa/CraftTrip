@@ -1,0 +1,291 @@
+@model CraftTrip.Web.ViewModels.WorkshopDetailViewModel
+@{
+    var ws = Model.Workshop;
+    ViewData["Title"] = ws.Title;
+    var hostProfile = ws.Host?.HostProfile;
+}
+
+<div class="container py-4">
+    <!-- Breadcrumbs -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index" class="text-decoration-none">Trang chủ</a></li>
+            <li class="breadcrumb-item"><a asp-controller="Workshop" asp-action="Index" class="text-decoration-none">Workshop</a></li>
+            @if (ws.Village != null)
+            {
+                <li class="breadcrumb-item"><a asp-controller="Village" asp-action="Details" asp-route-slug="@ws.Village.Slug" class="text-decoration-none">@ws.Village.Name</a></li>
+            }
+            <li class="breadcrumb-item active text-truncate" style="max-width: 300px;" aria-current="page">@ws.Title</li>
+        </ol>
+    </nav>
+
+    <!-- Header Section -->
+    <div class="mb-4">
+        <div class="d-flex flex-wrap gap-2 mb-2">
+            <span class="craft-badge-category">@ws.Category?.Name</span>
+            @if (ws.Village != null)
+            {
+                <span class="craft-badge-village"><i class="bi bi-geo-alt-fill me-1"></i> @ws.Village.Name</span>
+            }
+        </div>
+        <h1 class="font-serif fs-2 fw-bold mb-2">@ws.Title</h1>
+        <div class="d-flex flex-wrap align-items-center gap-3 small text-muted">
+            @if (ws.AverageRating > 0)
+            {
+                <div>
+                    <i class="bi bi-star-fill text-warning me-1"></i>
+                    <strong class="text-dark">@ws.AverageRating.ToString("F1")</strong>
+                    <span>(@ws.ReviewCount đánh giá)</span>
+                </div>
+                <span>•</span>
+            }
+            <div><i class="bi bi-clock me-1"></i> @ws.DurationMinutes phút</div>
+            <span>•</span>
+            <div><i class="bi bi-people me-1"></i> Nhóm từ @ws.MinParticipants đến @ws.MaxParticipants người</div>
+            <span>•</span>
+            <div><i class="bi bi-geo-alt me-1"></i> @ws.LocationAddress</div>
+        </div>
+    </div>
+
+    <!-- Gallery Grid -->
+    <div class="row g-2 mb-5 rounded-4 overflow-hidden shadow-sm" style="max-height: 480px;">
+        <div class="col-md-8">
+            <img src="@ws.CoverImageUrl" alt="@ws.Title" class="w-100 h-100 object-fit-cover" style="min-height: 380px; max-height: 480px;" />
+        </div>
+        <div class="col-md-4 d-none d-md-flex flex-column gap-2">
+            @foreach (var img in ws.Images.Where(i => !i.IsCover).Take(2))
+            {
+                <img src="@img.ImageUrl" alt="@(img.Caption ?? ws.Title)" class="w-100 h-50 object-fit-cover" />
+            }
+            @if (!ws.Images.Any(i => !i.IsCover))
+            {
+                <img src="@ws.CoverImageUrl" alt="@ws.Title" class="w-100 h-50 object-fit-cover filter-grayscale opacity-75" />
+                <img src="@ws.CoverImageUrl" alt="@ws.Title" class="w-100 h-50 object-fit-cover opacity-75" />
+            }
+        </div>
+    </div>
+
+    <!-- Main Content & Sticky Booking Box -->
+    <div class="row g-5">
+        <!-- Left Content -->
+        <div class="col-lg-8">
+            <!-- Artisan Card -->
+            <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
+                <div class="d-flex align-items-center gap-3">
+                    <img src="@(ws.Host?.AvatarUrl ?? "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80")"
+                         alt="@(ws.Host?.FullName)" class="rounded-circle object-fit-cover shadow-sm" style="width: 72px; height: 72px;" />
+                    <div>
+                        <span class="badge bg-gold-light text-wood px-2 py-1 small fw-semibold">Nghệ nhân hướng dẫn</span>
+                        <h5 class="fw-bold mb-0 mt-1">@(ws.Host?.FullName ?? "Nghệ nhân truyền thống")</h5>
+                        <div class="small text-muted">@(hostProfile?.StudioName ?? "Cơ sở sản xuất thủ công")</div>
+                    </div>
+                </div>
+                @if (!string.IsNullOrEmpty(hostProfile?.Bio))
+                {
+                    <p class="small text-muted mt-3 mb-0 fst-italic">
+                        "@hostProfile.Bio"
+                    </p>
+                }
+            </div>
+
+            <!-- Full Description -->
+            <div class="mb-5">
+                <h4 class="font-serif fw-bold mb-3">Giới thiệu trải nghiệm</h4>
+                <p class="text-secondary lh-lg" style="white-space: pre-line;">@ws.FullDescription</p>
+            </div>
+
+            <!-- Experience Steps -->
+            <div class="mb-5">
+                <h4 class="font-serif fw-bold mb-3">Các công đoạn thực hành cùng nghệ nhân</h4>
+                <div class="bg-white rounded-4 p-4 shadow-sm border border-light">
+                    <div class="text-secondary lh-lg" style="white-space: pre-line;">@ws.ExperienceSteps</div>
+                </div>
+            </div>
+
+            <!-- Take Home Product & Inclusions -->
+            <div class="row g-4 mb-5">
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-sm rounded-4 p-4 h-100 bg-white">
+                        <div class="d-flex align-items-center gap-2 mb-2 text-terracotta">
+                            <i class="bi bi-gift fs-4"></i>
+                            <h5 class="fw-bold mb-0">Sản phẩm mang về</h5>
+                        </div>
+                        <p class="small text-muted mb-0">@ws.TakeHomeProduct</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-sm rounded-4 p-4 h-100 bg-white">
+                        <div class="d-flex align-items-center gap-2 mb-2 text-bamboo">
+                            <i class="bi bi-check2-circle fs-4"></i>
+                            <h5 class="fw-bold mb-0">Dịch vụ bao gồm</h5>
+                        </div>
+                        <p class="small text-muted mb-0">@ws.IncludedServices</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Preparation guide -->
+            @if (!string.IsNullOrEmpty(ws.PreparationGuide))
+            {
+                <div class="alert alert-warning border-0 rounded-4 p-4 mb-5 shadow-sm d-flex gap-3 align-items-start">
+                    <i class="bi bi-info-circle-fill fs-4 text-warning mt-1"></i>
+                    <div>
+                        <h6 class="fw-bold mb-1">Những điều bạn cần chuẩn bị</h6>
+                        <p class="small text-muted mb-0">@ws.PreparationGuide</p>
+                    </div>
+                </div>
+            }
+
+            <!-- Cancellation Policy Box -->
+            <div class="card border-0 shadow-sm rounded-4 p-4 mb-5 bg-white">
+                <div class="d-flex align-items-center gap-2 mb-2 text-danger">
+                    <i class="bi bi-shield-check fs-4"></i>
+                    <h5 class="fw-bold mb-0">Chính sách hủy & hoàn tiền</h5>
+                </div>
+                <p class="small text-muted mb-0">
+                    Khách hàng được quyền <strong>hủy vé và hoàn lại 100%</strong> số tiền đã thanh toán nếu yêu cầu hủy được thực hiện trước giờ bắt đầu Workshop <strong>tối thiểu 48 tiếng</strong>. Trong vòng dưới 48 tiếng trước ca, chính sách hủy vé sẽ tự động đóng để đảm bảo công tác chuẩn bị nguyên vật liệu cho nghệ nhân.
+                </p>
+            </div>
+
+            <!-- Reviews Section -->
+            <div class="mb-5" id="reviews">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4 class="font-serif fw-bold mb-0">
+                        Đánh giá từ khách tham gia (@ws.Reviews.Count)
+                    </h4>
+                    @if (Model.CanReview && Model.EligibleBookingId.HasValue)
+                    {
+                        <a asp-controller="Review" asp-action="Create" asp-route-bookingId="@Model.EligibleBookingId.Value" class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-pencil-square me-1"></i> Viết đánh giá
+                        </a>
+                    }
+                </div>
+
+                @if (!ws.Reviews.Any())
+                {
+                    <div class="p-4 bg-white rounded-4 border text-center text-muted small">
+                        Chưa có bài đánh giá nào cho workshop này. Hãy là người đầu tiên trải nghiệm và chia sẻ cảm nhận nhé!
+                    </div>
+                }
+                else
+                {
+                    <div class="d-flex flex-column gap-3">
+                        @foreach (var review in ws.Reviews)
+                        {
+                            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 38px; height: 38px;">
+                                            @(review.Guest?.FullName?.FirstOrDefault() ?? 'K')
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold small">@(review.Guest?.FullName ?? "Khách hàng CraftTrip")</div>
+                                            <div class="text-muted" style="font-size: 0.75rem;">@review.CreatedAt.ToString("dd/MM/yyyy")</div>
+                                        </div>
+                                    </div>
+                                    <div class="text-warning small">
+                                        @for (int s = 1; s <= 5; s++)
+                                        {
+                                            <i class="bi @(s <= review.Rating ? "bi-star-fill" : "bi-star")"></i>
+                                        }
+                                    </div>
+                                </div>
+                                <p class="small text-secondary mb-0">@review.Comment</p>
+
+                                @if (!string.IsNullOrEmpty(review.HostReply))
+                                {
+                                    <div class="mt-3 p-3 rounded-3 bg-light border-start border-3 border-wood small">
+                                        <div class="fw-bold text-wood mb-1">
+                                            <i class="bi bi-reply-fill me-1"></i> Phản hồi từ Nghệ nhân:
+                                        </div>
+                                        <p class="text-muted mb-0">@review.HostReply</p>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Right: Sticky Booking Panel -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-lg rounded-4 p-4 sticky-top bg-white" style="top: 80px;">
+                <div class="d-flex justify-content-between align-items-baseline mb-3">
+                    <div>
+                        <span class="price-tag fs-3">@ws.BasePrice.ToString("N0") đ</span>
+                        <span class="price-unit">/ khách</span>
+                    </div>
+                    <span class="badge bg-light text-muted border small"><i class="bi bi-check2"></i> Còn mở đặt chỗ</span>
+                </div>
+
+                <div class="border rounded-3 p-3 bg-light mb-3">
+                    <label class="form-label small fw-bold text-dark mb-1">
+                        <i class="bi bi-calendar-check text-terracotta me-1"></i> Chọn lịch & Khung giờ còn trống
+                    </label>
+
+                    @if (!ws.Schedules.Any())
+                    {
+                        <div class="alert alert-secondary small mb-0 py-2">
+                            Hiện xưởng chưa mở thêm lịch mới. Vui lòng quay lại sau!
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="d-flex flex-column gap-2 mt-2" style="max-height: 280px; overflow-y: auto;">
+                            @foreach (var schedule in ws.Schedules.Where(s => s.Slots.Any(sl => sl.AvailableCapacity > 0)).OrderBy(s => s.Date))
+                            {
+                                <div class="p-2 bg-white rounded-3 border">
+                                    <div class="small fw-bold text-dark mb-1">
+                                        <i class="bi bi-calendar3 me-1 text-muted"></i> @schedule.Date.ToString("dddd, dd/MM/yyyy", new System.Globalization.CultureInfo("vi-VN"))
+                                    </div>
+                                    <div class="d-flex flex-wrap gap-1">
+                                        @foreach (var slot in schedule.Slots.Where(sl => sl.AvailableCapacity > 0).OrderBy(sl => sl.StartTime).ThenBy(sl => sl.EndTime))
+                                        {
+                                            <a asp-controller="Booking" asp-action="Checkout" asp-route-slotId="@slot.Id"
+                                               class="btn btn-outline-primary btn-sm flex-grow-1 text-nowrap d-flex justify-content-between align-items-center py-2 px-2">
+                                                <span>@slot.StartTime.ToString(@"hh\:mm") - @slot.EndTime.ToString(@"hh\:mm")</span>
+                                                <span class="badge bg-success-subtle text-success small">Còn @slot.AvailableCapacity chỗ</span>
+                                            </a>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+
+                <div class="small text-muted mb-3">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Giữ chỗ an toàn:</span>
+                        <span class="fw-semibold text-dark">15 phút thanh toán</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Hủy miễn phí:</span>
+                        <span class="fw-semibold text-success">Trước 48 tiếng</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span>Phương thức:</span>
+                        <span class="fw-semibold text-dark">Cổng VNPay (Thẻ, QR)</span>
+                    </div>
+                </div>
+
+                <div class="d-grid">
+                    @if (ws.Schedules.SelectMany(s => s.Slots).Any(sl => sl.AvailableCapacity > 0))
+                    {
+                        var firstAvailableSlot = ws.Schedules.SelectMany(s => s.Slots).FirstOrDefault(sl => sl.AvailableCapacity > 0);
+                        <a asp-controller="Booking" asp-action="Checkout" asp-route-slotId="@firstAvailableSlot?.Id" class="btn btn-primary py-3 fw-bold fs-6">
+                            Đặt chỗ ngay <i class="bi bi-arrow-right ms-1"></i>
+                        </a>
+                    }
+                    else
+                    {
+                        <button class="btn btn-secondary py-3 fw-bold disabled">
+                            Tạm hết chỗ
+                        </button>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

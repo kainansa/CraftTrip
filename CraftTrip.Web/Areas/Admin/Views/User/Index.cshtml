@@ -1,0 +1,94 @@
+@model List<CraftTrip.Core.Entities.ApplicationUser>
+@{
+    ViewData["Title"] = "Quản lý Người dùng Toàn hệ thống";
+}
+
+<div class="admin-container py-4">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+        <div>
+            <h1 class="h2 fw-bold text-dark mb-1">Quản lý Tài khoản Người dùng</h1>
+            <p class="text-muted fs-6 mb-0">Danh sách tất cả Khách du lịch, Nghệ nhân Host và Quản trị viên</p>
+        </div>
+        <a asp-action="Hosts" class="btn btn-primary rounded-pill px-4 shadow-sm">
+            <i class="bi bi-patch-check me-2"></i> Hồ sơ Nghệ nhân cần xác thực
+        </a>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show rounded-4 p-3 mb-4" role="alert">
+            <i class="bi bi-check-circle-fill me-2 fs-5"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
+        <div class="card-header bg-white py-3 px-4 border-bottom">
+            <span class="fs-6 fw-bold">Tổng cộng: @Model.Count tài khoản</span>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 fs-6">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Họ và tên</th>
+                        <th>Email & Số điện thoại</th>
+                        <th>Vai trò</th>
+                        <th>Ngày đăng ký</th>
+                        <th class="text-center">Trạng thái</th>
+                        <th class="text-center pe-4">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var u in Model)
+                    {
+                        <tr>
+                            <td class="ps-4">
+                                <div class="fw-bold text-dark">@u.FullName</div>
+                                <small class="text-muted font-monospace">@u.UserName</small>
+                            </td>
+                            <td>
+                                <div><i class="bi bi-envelope me-1 text-muted"></i>@u.Email</div>
+                                <small class="text-muted"><i class="bi bi-telephone me-1"></i>@(u.PhoneNumber ?? "Chưa cập nhật")</small>
+                            </td>
+                            <td>
+                                @switch (u.UserRole)
+                                {
+                                    case CraftTrip.Core.Enums.UserRole.Admin:
+                                        <span class="badge bg-danger rounded-pill px-3 py-2">Quản trị viên</span>
+                                        break;
+                                    case CraftTrip.Core.Enums.UserRole.Host:
+                                        <span class="badge bg-primary rounded-pill px-3 py-2">Nghệ nhân Host</span>
+                                        break;
+                                    case CraftTrip.Core.Enums.UserRole.Guest:
+                                        <span class="badge bg-secondary rounded-pill px-3 py-2">Khách du lịch</span>
+                                        break;
+                                }
+                            </td>
+                            <td>@u.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td class="text-center">
+                                @if (u.IsActive)
+                                {
+                                    <span class="badge bg-success rounded-pill px-3 py-2">Đang hoạt động</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger rounded-pill px-3 py-2">Bị khóa</span>
+                                }
+                            </td>
+                            <td class="text-center pe-4">
+                                <form asp-action="ToggleStatus" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@u.Id" />
+                                    <button type="submit" class="btn btn-sm @(u.IsActive ? "btn-outline-danger" : "btn-outline-success") rounded-pill px-3">
+                                        @(u.IsActive ? "Khóa tài khoản" : "Mở khóa")
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

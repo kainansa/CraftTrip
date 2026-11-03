@@ -1,0 +1,118 @@
+@model List<CraftTrip.Core.Entities.Booking>
+@{
+    ViewData["Title"] = "Đơn đặt chỗ của tôi";
+}
+
+<div class="container py-4">
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index" class="text-decoration-none">Trang chủ</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Đơn đặt chỗ</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="font-serif fw-bold mb-1">Đơn đặt chỗ & Vé QR của tôi</h2>
+            <p class="text-muted small mb-0">Quản lý vé đã mua, xem mã QR check-in và gửi đánh giá trải nghiệm</p>
+        </div>
+        <a asp-controller="Workshop" asp-action="Index" class="btn btn-outline-primary btn-sm">
+            <i class="bi bi-plus me-1"></i> Khám phá thêm workshop
+        </a>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="card border-0 shadow-sm rounded-4 p-5 text-center bg-white">
+            <i class="bi bi-ticket-perforated fs-1 text-muted opacity-50 mb-3 d-block"></i>
+            <h5 class="fw-bold">Bạn chưa có đơn đặt chỗ nào</h5>
+            <p class="text-muted small">Hãy bắt đầu hành trình khám phá những làng nghề truyền thống tuyệt đẹp nhé!</p>
+            <a asp-controller="Workshop" asp-action="Index" class="btn btn-primary btn-sm mx-auto px-4 mt-2">
+                Khám phá trải nghiệm ngay
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="d-flex flex-column gap-3">
+            @foreach (var b in Model)
+            {
+                var slot = b.Slot;
+                var sessionStart = slot != null && slot.Schedule != null ? slot.Schedule.Date.Date + slot.StartTime : DateTime.MinValue;
+                var canCancel = (b.Status == BookingStatus.Confirmed || b.Status == BookingStatus.Paid) &&
+                                (sessionStart - DateTime.UtcNow).TotalHours >= 48;
+
+                <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+                    <div class="row align-items-center g-3">
+                        <div class="col-md-2 text-center text-md-start">
+                            <img src="@(b.Workshop?.CoverImageUrl ?? "https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?auto=format&fit=crop&w=300&q=80")"
+                                 alt="@b.Workshop?.Title" class="rounded-3 object-fit-cover shadow-sm w-100" style="height: 100px;" />
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <span class="badge bg-light text-muted border small font-monospace">@b.BookingCode</span>
+                                @if (b.Status == BookingStatus.Confirmed)
+                                {
+                                    <span class="badge bg-success-subtle text-success small">Đã xác nhận</span>
+                                }
+                                else if (b.Status == BookingStatus.Completed)
+                                {
+                                    <span class="badge bg-primary-subtle text-primary small">Đã hoàn thành</span>
+                                }
+                                else if (b.Status == BookingStatus.Canceled)
+                                {
+                                    <span class="badge bg-danger-subtle text-danger small">Đã hủy</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning-subtle text-warning small">Đang chờ</span>
+                                }
+                            </div>
+                            <h5 class="fw-bold mb-1">@b.Workshop?.Title</h5>
+                            <div class="small text-muted mb-1">
+                                <i class="bi bi-calendar3 me-1"></i> Ngày: <strong>@slot?.Schedule?.Date.ToString("dd/MM/yyyy")</strong>
+                                <span class="mx-1">•</span>
+                                <i class="bi bi-clock me-1"></i> Giờ: <strong>@slot?.StartTime.ToString(@"hh\:mm") - @slot?.EndTime.ToString(@"hh\:mm")</strong>
+                            </div>
+                            <div class="small text-muted">
+                                <i class="bi bi-people me-1"></i> Số lượng: <strong>@b.Quantity khách</strong>
+                                <span class="mx-2">•</span>
+                                <span class="price-tag fs-6">@b.TotalAmount.ToString("N0") đ</span>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4 text-md-end d-flex flex-column gap-2">
+                            <a asp-action="Details" asp-route-id="@b.Id" class="btn btn-outline-primary btn-sm py-2">
+                                <i class="bi bi-qr-code-scan me-1"></i> Xem vé & Mã QR
+                            </a>
+
+                            @if (b.Status == BookingStatus.Completed && b.Review == null)
+                            {
+                                <a asp-controller="Review" asp-action="Create" asp-route-bookingId="@b.Id" class="btn btn-sm btn-warning text-dark py-2 fw-semibold">
+                                    <i class="bi bi-star-fill me-1"></i> Viết đánh giá
+                                </a>
+                            }
+                            else if (b.Review != null)
+                            {
+                                <span class="badge bg-light text-muted small py-2 border"><i class="bi bi-check-circle me-1 text-success"></i> Đã đánh giá</span>
+                            }
+
+                            @if (canCancel)
+                            {
+                                <a asp-action="Cancel" asp-route-id="@b.Id" class="btn btn-sm btn-outline-danger py-1 small">
+                                    Hủy vé (Hoàn 100%)
+                                </a>
+                            }
+                            else if (b.Status == BookingStatus.Confirmed && (sessionStart - DateTime.UtcNow).TotalHours < 48)
+                            {
+                                <span class="small text-muted" title="Chính sách chỉ cho phép hủy trước ca tối thiểu 48 tiếng">
+                                    <i class="bi bi-lock-fill me-1"></i> Khóa hủy vé (&lt; 48h)
+                                </span>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

@@ -1,0 +1,61 @@
+@model CraftTrip.Core.Entities.CraftCategory
+@{
+    ViewData["Title"] = "Chỉnh sửa Danh mục: " + Model.Name;
+}
+
+<div class="admin-container py-4">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <a asp-action="Index" class="btn btn-outline-secondary btn-sm rounded-pill px-3 mb-2">
+                <i class="bi bi-arrow-left me-1"></i> Quay lại danh sách
+            </a>
+            <h1 class="h2 fw-bold text-dark mb-0">Chỉnh sửa Danh mục: @Model.Name</h1>
+        </div>
+    </div>
+
+    <form asp-action="Edit" asp-route-id="@Model.Id" method="post" class="card shadow-sm border-0 rounded-4 p-4 p-md-5">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="Id" />
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-4"></div>
+
+        <div class="row g-4">
+            <div class="col-md-6">
+                <label asp-for="Name" class="form-label fw-semibold fs-6">Tên ngành nghề <span class="text-danger">*</span></label>
+                <input asp-for="Name" class="form-control form-control-lg fs-6" required />
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="IconClass" class="form-label fw-semibold fs-6">Bootstrap Icon Class</label>
+                <input asp-for="IconClass" class="form-control form-control-lg fs-6" />
+            </div>
+
+            <div class="col-12">
+                <label asp-for="ImageUrl" class="form-label fw-semibold fs-6">Link hình ảnh đại diện</label>
+                <input asp-for="ImageUrl" class="form-control form-control-lg fs-6" />
+            </div>
+
+            <div class="col-12">
+                <label asp-for="Description" class="form-label fw-semibold fs-6">Mô tả đặc sắc của ngành nghề</label>
+                <textarea asp-for="Description" class="form-control fs-6" rows="4"></textarea>
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="DisplayOrder" class="form-label fw-semibold fs-6">Thứ tự hiển thị</label>
+                <input asp-for="DisplayOrder" type="number" class="form-control form-control-lg fs-6" />
+            </div>
+
+            <div class="col-md-6 d-flex align-items-center">
+                <div class="form-check form-switch fs-5 mt-4">
+                    <input asp-for="IsFeatured" class="form-check-input" type="checkbox" role="switch" />
+                    <label asp-for="IsFeatured" class="form-check-label fs-6 fw-semibold">Danh mục tiêu biểu trên Trang chủ</label>
+                </div>
+            </div>
+
+            <div class="col-12 pt-3">
+                <button type="submit" class="btn btn-primary btn-lg rounded-pill px-5 shadow">
+                    <i class="bi bi-check-circle-fill me-2"></i> Lưu cập nhật
+                </button>
+            </div>
+        </div>
+    </form>
+</div>

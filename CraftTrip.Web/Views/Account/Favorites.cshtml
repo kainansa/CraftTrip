@@ -1,0 +1,53 @@
+@model List<CraftTrip.Core.Entities.Workshop>
+@{
+    ViewData["Title"] = "Workshop Yêu thích";
+}
+
+<div class="container py-4">
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index" class="text-decoration-none">Trang chủ</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Yêu thích</li>
+        </ol>
+    </nav>
+
+    <h2 class="font-serif fw-bold mb-4">Workshop Yêu thích của tôi</h2>
+
+    @if (!Model.Any())
+    {
+        <div class="card border-0 shadow-sm rounded-4 p-5 text-center bg-white">
+            <i class="bi bi-heart fs-1 text-muted opacity-50 mb-3 d-block"></i>
+            <h5 class="fw-bold">Chưa có workshop nào được lưu</h5>
+            <p class="text-muted small">Hãy nhấn vào biểu tượng trái tim khi xem các trải nghiệm để lưu lại nhé.</p>
+            <a asp-controller="Workshop" asp-action="Index" class="btn btn-primary btn-sm mx-auto px-4 mt-2">
+                Khám phá Workshop
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var ws in Model)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <div class="craft-card">
+                        <img src="@ws.CoverImageUrl" alt="@ws.Title" class="craft-card-img" />
+                        <div class="p-3 d-flex flex-column flex-grow-1">
+                            <h6 class="fw-bold mb-2">
+                                <a asp-controller="Workshop" asp-action="Details" asp-route-id="@ws.Id" class="text-decoration-none text-dark">
+                                    @ws.Title
+                                </a>
+                            </h6>
+                            <div class="d-flex justify-content-between align-items-center mt-auto pt-2 border-top">
+                                <span class="price-tag fs-6">@ws.BasePrice.ToString("N0") đ</span>
+                                <a asp-controller="Workshop" asp-action="Details" asp-route-id="@ws.Id" class="btn btn-sm btn-outline-primary">
+                                    Xem chi tiết
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

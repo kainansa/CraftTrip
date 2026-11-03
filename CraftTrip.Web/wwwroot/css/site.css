@@ -1,0 +1,368 @@
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap');
+@import url('https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css');
+
+:root {
+    --ct-bg: #FDFBF7;
+    --ct-white: #FFFFFF;
+    --ct-wood: #6B4E31;
+    --ct-wood-hover: #553E26;
+    --ct-lacquer: #3D2B20;
+    --ct-terracotta: #B86F4B;
+    --ct-terracotta-light: #F7EBE5;
+    --ct-bamboo: #71845A;
+    --ct-bamboo-light: #EBF2E6;
+    --ct-gold: #D4A373;
+    --ct-gold-light: #FAF4EC;
+    --ct-silk: #E9DDC8;
+    --ct-text: #2C2C2C;
+    --ct-muted: #757575;
+    --ct-border: #EFE8DC;
+    --ct-shadow-sm: 0 2px 8px rgba(61, 43, 32, 0.05);
+    --ct-shadow: 0 8px 24px rgba(61, 43, 32, 0.08);
+    --ct-shadow-lg: 0 16px 36px rgba(61, 43, 32, 0.12);
+}
+
+body {
+    background-color: var(--ct-bg);
+    color: var(--ct-text);
+    font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+h1, h2, h3, .font-serif {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 700;
+    color: var(--ct-lacquer);
+}
+
+/* Custom Buttons */
+.btn-primary {
+    background-color: var(--ct-wood);
+    border-color: var(--ct-wood);
+    color: #FFFFFF;
+    font-weight: 500;
+    border-radius: 8px;
+    padding: 0.6rem 1.4rem;
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-primary:hover, .btn-primary:focus {
+    background-color: var(--ct-wood-hover);
+    border-color: var(--ct-wood-hover);
+    color: #FFFFFF;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(107, 78, 49, 0.25);
+}
+
+.btn-outline-primary {
+    color: var(--ct-wood);
+    border-color: var(--ct-wood);
+    border-radius: 8px;
+    font-weight: 500;
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--ct-wood);
+    border-color: var(--ct-wood);
+    color: #FFFFFF;
+}
+
+.btn-terracotta {
+    background-color: var(--ct-terracotta);
+    border-color: var(--ct-terracotta);
+    color: #FFFFFF;
+    border-radius: 8px;
+    font-weight: 500;
+}
+
+.btn-terracotta:hover {
+    background-color: #A25B37;
+    border-color: #A25B37;
+    color: #FFFFFF;
+}
+
+/* Navbar */
+.navbar-craft {
+    background-color: rgba(253, 251, 247, 0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--ct-border);
+    transition: all 0.3s ease;
+}
+
+.navbar-brand {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--ct-wood) !important;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.nav-link {
+    color: var(--ct-text);
+    font-weight: 500;
+    padding: 0.5rem 0.9rem !important;
+    transition: color 0.2s;
+}
+
+.nav-link:hover, .nav-link.active {
+    color: var(--ct-terracotta);
+}
+
+/* Hero Section */
+.hero-section {
+    position: relative;
+    padding: 5rem 0 6rem;
+    background-size: cover;
+    background-position: center;
+    border-radius: 0 0 32px 32px;
+}
+
+.hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(61, 43, 32, 0.75) 0%, rgba(61, 43, 32, 0.55) 100%);
+    border-radius: 0 0 32px 32px;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 2;
+    color: #FFFFFF;
+}
+
+.hero-title {
+    font-size: 3.2rem;
+    line-height: 1.25;
+    margin-bottom: 1.2rem;
+    color: #FFFFFF;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+.hero-subtitle {
+    font-size: 1.25rem;
+    color: rgba(255, 255, 255, 0.9);
+    max-width: 650px;
+    margin: 0 auto 2.5rem;
+    line-height: 1.6;
+}
+
+/* Search Bar Floating Card */
+.search-float-card {
+    background: #FFFFFF;
+    border-radius: 16px;
+    padding: 1.25rem 1.75rem;
+    box-shadow: var(--ct-shadow-lg);
+    border: 1px solid var(--ct-border);
+}
+
+/* Workshop Cards */
+.craft-card {
+    background: #FFFFFF;
+    border-radius: 16px;
+    border: 1px solid var(--ct-border);
+    overflow: hidden;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.craft-card:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--ct-shadow);
+}
+
+.craft-card-img {
+    height: 220px;
+    width: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+}
+
+.craft-card:hover .craft-card-img {
+    transform: scale(1.04);
+}
+
+.craft-badge-category {
+    background-color: var(--ct-gold-light);
+    color: var(--ct-wood);
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 0.35rem 0.75rem;
+    border-radius: 20px;
+    display: inline-block;
+}
+
+.craft-badge-village {
+    background-color: var(--ct-bamboo-light);
+    color: var(--ct-bamboo);
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 0.35rem 0.75rem;
+    border-radius: 20px;
+    display: inline-block;
+}
+
+/* Price Display */
+.price-tag {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--ct-terracotta);
+}
+
+.price-unit {
+    font-size: 0.85rem;
+    color: var(--ct-muted);
+}
+
+/* Timeline Components for Trips */
+.trip-timeline {
+    position: relative;
+    padding-left: 2.5rem;
+}
+
+.trip-timeline::before {
+    content: '';
+    position: absolute;
+    left: 14px;
+    top: 10px;
+    bottom: 10px;
+    width: 2px;
+    background: var(--ct-silk);
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 2.5rem;
+}
+
+.timeline-dot {
+    position: absolute;
+    left: -2.5rem;
+    top: 4px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: var(--ct-wood);
+    color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    box-shadow: 0 0 0 4px var(--ct-bg);
+}
+
+/* Host Artisan Usability Tokens (Part 4.2) */
+.host-body {
+    font-size: 16px;
+    background-color: #F8F5EE;
+}
+
+.host-btn-lg {
+    min-height: 52px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+}
+
+.host-action-card {
+    background: #FFFFFF;
+    border: 2px solid var(--ct-border);
+    border-radius: 16px;
+    padding: 1.75rem;
+    transition: all 0.25s ease;
+    text-decoration: none;
+    color: var(--ct-text);
+    display: block;
+}
+
+.host-action-card:hover {
+    border-color: var(--ct-terracotta);
+    box-shadow: var(--ct-shadow);
+    color: var(--ct-terracotta);
+}
+
+.host-metric-card {
+    background: #FFFFFF;
+    border: 1px solid var(--ct-border);
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: var(--ct-shadow-sm);
+}
+
+.host-metric-val {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: var(--ct-wood);
+    line-height: 1.2;
+}
+
+/* Admin Dashboard Tokens */
+.admin-sidebar {
+    background-color: #241A13;
+    min-height: 100vh;
+    color: #E2D9CC;
+}
+
+.admin-nav-link {
+    color: #C5BBAF;
+    padding: 0.75rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    margin-bottom: 0.25rem;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.admin-nav-link:hover, .admin-nav-link.active {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #FFFFFF;
+}
+
+/* Custom form elements */
+.form-control, .form-select {
+    border-radius: 8px;
+    border: 1px solid var(--ct-border);
+    padding: 0.6rem 0.9rem;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--ct-wood);
+    box-shadow: 0 0 0 0.2rem rgba(107, 78, 49, 0.15);
+}
+
+/* Footer */
+.craft-footer {
+    background-color: var(--ct-lacquer);
+    color: #DDD3C5;
+    padding: 4rem 0 2rem;
+    border-top: 1px solid rgba(255,255,255,0.08);
+}
+
+.craft-footer h5 {
+    color: #FFFFFF;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.25rem;
+    margin-bottom: 1.25rem;
+}
+
+.craft-footer a {
+    color: #DDD3C5;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.craft-footer a:hover {
+    color: var(--ct-gold);
+}

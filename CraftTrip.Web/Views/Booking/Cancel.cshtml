@@ -1,0 +1,58 @@
+@model CraftTrip.Web.ViewModels.BookingCancelViewModel
+@{
+    ViewData["Title"] = "Hủy vé trải nghiệm";
+}
+
+<div class="container py-4">
+    <div class="max-w-600 mx-auto">
+        <div class="card border-0 shadow-lg rounded-4 p-4 p-md-5 bg-white">
+            <h3 class="font-serif fw-bold text-danger mb-3">Xác nhận hủy vé Workshop</h3>
+
+            @if (!Model.IsEligibleForFullRefund)
+            {
+                <div class="alert alert-danger border-0 rounded-3 mb-4">
+                    <h6 class="fw-bold mb-1"><i class="bi bi-x-octagon-fill me-1"></i> Không thể hủy vé theo chính sách</h6>
+                    <p class="small mb-0">
+                        Chính sách CraftTrip chỉ cho phép hủy vé tối thiểu <strong>48 tiếng</strong> trước giờ bắt đầu Workshop. Thời gian hiện tại còn dưới 48 tiếng, xưởng đã chuẩn bị nguyên vật liệu và không thể hoàn hủy.
+                    </p>
+                </div>
+                <div class="text-center">
+                    <a asp-action="History" class="btn btn-secondary px-4">Quay lại lịch sử</a>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-success border-0 rounded-3 mb-4 small">
+                    <i class="bi bi-check-circle-fill text-success me-1 fs-5"></i>
+                    <strong>Đủ điều kiện hoàn tiền 100%:</strong> Yêu cầu hủy vé của bạn thực hiện trước ca 48 tiếng. Bạn sẽ được hoàn lại <strong>@Model.TotalAmount.ToString("N0") đ</strong> theo quy định.
+                </div>
+
+                <div class="bg-light rounded-3 p-3 mb-4 small">
+                    <div class="mb-2"><strong>Mã đơn:</strong> @Model.BookingCode</div>
+                    <div class="mb-2"><strong>Workshop:</strong> @Model.WorkshopTitle</div>
+                    <div><strong>Giờ bắt đầu:</strong> @Model.SessionStartTime.ToString("HH:mm dd/MM/yyyy")</div>
+                </div>
+
+                <form asp-action="ConfirmCancel" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="BookingId" />
+
+                    <div class="mb-4">
+                        <label asp-for="Reason" class="form-label small fw-semibold">Lý do hủy vé *</label>
+                        <textarea asp-for="Reason" class="form-control" rows="3" placeholder="Vui lòng cho biết lý do bạn hủy vé để chúng tôi cải thiện chất lượng..."></textarea>
+                        <span asp-validation-for="Reason" class="text-danger small"></span>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-danger flex-grow-1 py-2 fw-semibold">
+                            Xác nhận hủy vé & Hoàn tiền 100%
+                        </button>
+                        <a asp-action="History" class="btn btn-outline-secondary py-2 px-3">
+                            Quay lại
+                        </a>
+                    </div>
+                </form>
+            }
+        </div>
+    </div>
+</div>

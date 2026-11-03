@@ -1,0 +1,289 @@
+@model CraftTrip.Web.ViewModels.HomeViewModel
+@{
+    ViewData["Title"] = "Trang chủ";
+    var heroBg = Model.HeroSection?.BackgroundImageUrl ?? "https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?auto=format&fit=crop&w=1600&q=80";
+}
+
+<!-- 1. HERO BANNER -->
+<section class="hero-section text-center" style="background-image: url('@heroBg');">
+    <div class="hero-overlay"></div>
+    <div class="container hero-content py-5">
+        <span class="badge bg-warning text-dark px-3 py-2 rounded-pill fw-bold mb-3 fs-6">
+            <i class="bi bi-stars me-1"></i> Tinh hoa Di sản Làng nghề Việt
+        </span>
+        <h1 class="hero-title font-serif">
+            @(Model.HeroSection?.Title ?? "Chạm vào tinh hoa làng nghề Việt")
+        </h1>
+        <p class="hero-subtitle">
+            @(Model.HeroSection?.Subtitle ?? "Khám phá những làng nghề truyền thống, gặp gỡ nghệ nhân và tự tay tạo nên những tác phẩm mang dấu ấn Việt Nam.")
+        </p>
+
+        <!-- 2. SEARCH PANEL FLOATING CARD -->
+        <div class="search-float-card mx-auto text-start" style="max-width: 900px;">
+            <form asp-controller="Workshop" asp-action="Index" method="get" class="row g-2 align-items-center">
+                <div class="col-md-4">
+                    <label class="form-label small fw-bold text-muted mb-1"><i class="bi bi-search text-warning me-1"></i> Bạn muốn khám phá gì?</label>
+                    <input type="text" name="keyword" class="form-control border-0 bg-light py-2" placeholder="Tên workshop, đồ gốm, dệt lụa..." />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold text-muted mb-1"><i class="bi bi-geo-alt text-warning me-1"></i> Địa điểm làng nghề</label>
+                    <select name="villageId" class="form-select border-0 bg-light py-2">
+                        <option value="">Tất cả làng nghề</option>
+                        @foreach (var village in Model.FeaturedVillages)
+                        {
+                            <option value="@village.Id">@village.Name</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold text-muted mb-1"><i class="bi bi-calendar-event text-warning me-1"></i> Ngày trải nghiệm</label>
+                    <input type="date" name="availableDate" class="form-control border-0 bg-light py-2" min="@DateTime.UtcNow.ToString("yyyy-MM-dd")" />
+                </div>
+                <div class="col-md-2 d-grid">
+                    <label class="form-label small d-none d-md-block">&nbsp;</label>
+                    <button type="submit" class="btn btn-primary py-2 fw-bold shadow-sm">
+                        <i class="bi bi-search me-1"></i> Tìm kiếm
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+<!-- 3. FEATURED CRAFT CATEGORIES -->
+<section class="container py-5 mt-4">
+    <div class="d-flex justify-content-between align-items-end mb-4">
+        <div>
+            <span class="text-terracotta fw-bold small text-uppercase tracking-wider">Khám phá theo ngành nghề</span>
+            <h2 class="font-serif fs-2 mt-1">Nghề thủ công tiêu biểu</h2>
+        </div>
+        <a asp-controller="Workshop" asp-action="Index" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+            Xem tất cả <i class="bi bi-arrow-right ms-1"></i>
+        </a>
+    </div>
+
+    <div class="row g-3">
+        @foreach (var cat in Model.FeaturedCategories)
+        {
+            <div class="col-lg-2 col-md-4 col-6">
+                <a asp-controller="Workshop" asp-action="Index" asp-route-categoryId="@cat.Id" class="text-decoration-none">
+                    <div class="card border-0 shadow-sm rounded-4 text-center p-3 h-100 transition-all hover-top">
+                        <div class="ratio ratio-1x1 mb-2 rounded-circle overflow-hidden shadow-sm mx-auto" style="max-width: 80px;">
+                            <img src="@cat.ImageUrl" alt="@cat.Name" class="object-fit-cover" />
+                        </div>
+                        <h6 class="fw-bold text-dark mb-1 small">@cat.Name</h6>
+                        <span class="text-muted" style="font-size: 0.75rem;">@cat.Workshops.Count trải nghiệm</span>
+                    </div>
+                </a>
+            </div>
+        }
+    </div>
+</section>
+
+<!-- 4. FEATURED CRAFT VILLAGES -->
+<section class="container py-5">
+    <div class="d-flex justify-content-between align-items-end mb-4">
+        <div>
+            <span class="text-terracotta fw-bold small text-uppercase tracking-wider">Hồn cốt ngàn năm</span>
+            <h2 class="font-serif fs-2 mt-1">Làng nghề truyền thống nổi tiếng</h2>
+        </div>
+        <a asp-controller="Village" asp-action="Index" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+            Xem tất cả làng nghề <i class="bi bi-arrow-right ms-1"></i>
+        </a>
+    </div>
+
+    <div class="row g-4">
+        @foreach (var village in Model.FeaturedVillages)
+        {
+            <div class="col-lg-4 col-md-6">
+                <div class="craft-card">
+                    <div class="position-relative overflow-hidden">
+                        <img src="@village.CoverImageUrl" alt="@village.Name" class="craft-card-img" />
+                        <span class="position-absolute top-0 start-0 m-3 craft-badge-village">
+                            <i class="bi bi-geo-alt-fill me-1"></i> @village.Location
+                        </span>
+                    </div>
+                    <div class="p-4 d-flex flex-column flex-grow-1">
+                        <h5 class="fw-bold mb-2">@village.Name</h5>
+                        <p class="text-muted small mb-3 flex-grow-1">@village.ShortDescription</p>
+                        <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                            <span class="small fw-semibold text-secondary">
+                                <i class="bi bi-palette me-1"></i> @village.Workshops.Count(w => w.Status == WorkshopStatus.Published) Workshop
+                            </span>
+                            <a asp-controller="Village" asp-action="Details" asp-route-slug="@village.Slug" class="btn btn-sm btn-outline-primary">
+                                Khám phá làng <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</section>
+
+<!-- 5. FEATURED WORKSHOPS -->
+<section class="container py-5">
+    <div class="d-flex justify-content-between align-items-end mb-4">
+        <div>
+            <span class="text-terracotta fw-bold small text-uppercase tracking-wider">Trải nghiệm tuyển chọn</span>
+            <h2 class="font-serif fs-2 mt-1">Workshop được yêu thích nhất</h2>
+        </div>
+        <a asp-controller="Workshop" asp-action="Index" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+            Tất cả Workshop <i class="bi bi-arrow-right ms-1"></i>
+        </a>
+    </div>
+
+    <div class="row g-4">
+        @foreach (var ws in Model.FeaturedWorkshops)
+        {
+            <div class="col-lg-4 col-md-6">
+                <div class="craft-card">
+                    <div class="position-relative overflow-hidden">
+                        <img src="@ws.CoverImageUrl" alt="@ws.Title" class="craft-card-img" />
+                        <span class="position-absolute top-0 start-0 m-3 craft-badge-category">
+                            @ws.Category?.Name
+                        </span>
+                        @if (ws.AverageRating > 0)
+                        {
+                            <span class="position-absolute top-0 end-0 m-3 badge bg-white text-dark shadow-sm px-2 py-1">
+                                <i class="bi bi-star-fill text-warning me-1"></i> @ws.AverageRating.ToString("F1") (@ws.ReviewCount)
+                            </span>
+                        }
+                    </div>
+                    <div class="p-4 d-flex flex-column flex-grow-1">
+                        <div class="small text-muted mb-1">
+                            <i class="bi bi-geo-alt me-1"></i> @(ws.Village?.Name ?? ws.LocationAddress)
+                        </div>
+                        <h5 class="fw-bold mb-2">
+                            <a asp-controller="Workshop" asp-action="Details" asp-route-id="@ws.Id" class="text-decoration-none text-dark">
+                                @ws.Title
+                            </a>
+                        </h5>
+                        <p class="text-muted small mb-3 flex-grow-1 line-clamp-2">@ws.ShortDescription</p>
+                        <div class="d-flex justify-content-between align-items-center pt-3 border-top mt-auto">
+                            <div>
+                                <span class="price-tag">@ws.BasePrice.ToString("N0") đ</span>
+                                <span class="price-unit">/ người</span>
+                            </div>
+                            <div class="small text-muted">
+                                <i class="bi bi-clock me-1"></i> @ws.DurationMinutes phút
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</section>
+
+<!-- 6. MEET THE ARTISANS -->
+<section class="bg-white py-5 border-top border-bottom my-5">
+    <div class="container py-3">
+        <div class="text-center max-w-700 mx-auto mb-5">
+            <span class="text-terracotta fw-bold small text-uppercase tracking-wider">Người giữ hồn di sản</span>
+            <h2 class="font-serif fs-2 mt-1">Gặp gỡ các Nghệ nhân</h2>
+            <p class="text-muted">Lắng nghe những câu chuyện đời, chuyện nghề và học hỏi trực tiếp từ những đôi bàn tay tài hoa bậc thầy.</p>
+        </div>
+
+        <div class="row g-4">
+            @foreach (var artisan in Model.FeaturedArtisans)
+            {
+                <div class="col-lg-6">
+                    <div class="p-4 rounded-4 border bg-light d-flex gap-4 align-items-center">
+                        <img src="@artisan.AvatarUrl" alt="@artisan.FullName" class="rounded-circle object-fit-cover shadow-sm flex-shrink-0" style="width: 110px; height: 110px;" />
+                        <div>
+                            <span class="badge bg-gold text-dark mb-1">@artisan.Title</span>
+                            <h5 class="fw-bold mb-1">@artisan.FullName</h5>
+                            <div class="small text-muted mb-2"><i class="bi bi-award me-1"></i> @artisan.YearsOfExperience năm kinh nghiệm</div>
+                            <p class="small text-muted mb-0 fst-italic">"@artisan.Story"</p>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- 7. HOW IT WORKS -->
+<section class="container py-5">
+    <div class="text-center max-w-700 mx-auto mb-5">
+        <span class="text-terracotta fw-bold small text-uppercase tracking-wider">Quy trình đơn giản</span>
+        <h2 class="font-serif fs-2 mt-1">@(Model.HowItWorksSection?.Title ?? "Hành trình trải nghiệm tại CraftTrip")</h2>
+        <p class="text-muted">@(Model.HowItWorksSection?.Subtitle ?? "Đơn giản, minh bạch và gắn kết chân thực cùng nghệ nhân")</p>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.HowItWorksSection?.ContentHtml))
+    {
+        @Html.Raw(Model.HowItWorksSection.ContentHtml)
+    }
+</section>
+
+<!-- 8. CURATED LOCAL TRIPS -->
+<section class="container py-5">
+    <div class="d-flex justify-content-between align-items-end mb-4">
+        <div>
+            <span class="text-terracotta fw-bold small text-uppercase tracking-wider">Hành trình trọn gói</span>
+            <h2 class="font-serif fs-2 mt-1">Chuyến đi gợi ý kết hợp trải nghiệm</h2>
+        </div>
+        <a asp-controller="Trip" asp-action="Index" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+            Tất cả chuyến đi <i class="bi bi-arrow-right ms-1"></i>
+        </a>
+    </div>
+
+    <div class="row g-4">
+        @foreach (var trip in Model.FeaturedTrips)
+        {
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
+                    <div class="row g-0 h-100">
+                        <div class="col-md-5">
+                            <img src="@trip.CoverImageUrl" alt="@trip.Title" class="w-100 h-100 object-fit-cover" style="min-height: 240px;" />
+                        </div>
+                        <div class="col-md-7 p-4 d-flex flex-column">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="badge bg-secondary-subtle text-secondary small">
+                                    <i class="bi bi-clock me-1"></i> @trip.DurationDescription
+                                </span>
+                                <span class="fw-bold text-terracotta">~@trip.EstimatedCost.ToString("N0") đ</span>
+                            </div>
+                            <h5 class="fw-bold mb-2">
+                                <a asp-controller="Trip" asp-action="Details" asp-route-slug="@trip.Slug" class="text-decoration-none text-dark">
+                                    @trip.Title
+                                </a>
+                            </h5>
+                            <p class="text-muted small mb-3 flex-grow-1">@trip.ShortDescription</p>
+                            <a asp-controller="Trip" asp-action="Details" asp-route-slug="@trip.Slug" class="btn btn-sm btn-outline-primary mt-auto align-self-start">
+                                Xem lịch trình chi tiết <i class="bi bi-arrow-right ms-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</section>
+
+<!-- 9. BECOME A HOST BANNER -->
+<section class="container py-5 mb-4">
+    <div class="rounded-5 overflow-hidden position-relative p-5 text-white" style="background: linear-gradient(135deg, #3D2B20 0%, #6B4E31 100%);">
+        <div class="row align-items-center position-relative z-2">
+            <div class="col-lg-8">
+                <span class="badge bg-warning text-dark px-3 py-1 rounded-pill fw-bold mb-3">Dành cho Nghệ nhân & Xưởng</span>
+                <h2 class="font-serif text-white fs-1 mb-3">
+                    @(Model.BecomeHostSection?.Title ?? "Bạn là nghệ nhân hay chủ cơ sở thủ công làng nghề?")
+                </h2>
+                <p class="fs-6 opacity-75 mb-4 max-w-600">
+                    @(Model.BecomeHostSection?.Subtitle ?? "Cùng CraftTrip đưa câu chuyện nghề truyền thống của bạn đến với hàng ngàn du khách trong và ngoài nước. Tạo nguồn thu bền vững cho di sản quê hương.")
+                </p>
+                <div class="d-flex flex-wrap gap-3">
+                    <a asp-area="Host" asp-controller="Onboarding" asp-action="Index" class="btn btn-warning px-4 py-2 fw-bold text-dark rounded-pill">
+                        @(Model.BecomeHostSection?.PrimaryCtaText ?? "Đăng ký mở xưởng ngay") <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-4 text-center d-none d-lg-block">
+                <i class="bi bi-shop text-warning opacity-50" style="font-size: 8rem;"></i>
+            </div>
+        </div>
+    </div>
+</section>

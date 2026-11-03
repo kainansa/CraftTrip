@@ -1,0 +1,118 @@
+@model CraftTrip.Core.Entities.HostProfile
+@using CraftTrip.Core.Enums
+@{
+    ViewData["Title"] = "Hồ sơ xưởng thủ công";
+}
+
+<div class="host-container py-4">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+        <div>
+            <h1 class="h2 fw-bold text-dark mb-1">Hồ sơ cơ sở & Tài khoản nhận tiền</h1>
+            <p class="text-muted fs-6 mb-0">Quản lý thông tin xưởng thủ công, địa chỉ và số tài khoản ngân hàng để nhận doanh thu</p>
+        </div>
+        <div>
+            @switch (Model.VerificationStatus)
+            {
+                case HostVerificationStatus.Verified:
+                    <span class="badge bg-success px-4 py-2 fs-6 rounded-pill">
+                        <i class="bi bi-patch-check-fill me-1"></i> Đối tác đã xác thực
+                    </span>
+                    break;
+                case HostVerificationStatus.Pending:
+                    <span class="badge bg-warning text-dark px-4 py-2 fs-6 rounded-pill">
+                        <i class="bi bi-clock-history me-1"></i> Đang chờ duyệt hồ sơ
+                    </span>
+                    break;
+                case HostVerificationStatus.Rejected:
+                    <span class="badge bg-danger px-4 py-2 fs-6 rounded-pill">
+                        <i class="bi bi-x-circle me-1"></i> Cần cập nhật lại thông tin
+                    </span>
+                    break;
+            }
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show rounded-4 p-3 mb-4" role="alert">
+            <i class="bi bi-check-circle-fill me-2 fs-5"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <form asp-action="Update" method="post" class="card shadow-sm border-0 rounded-4 p-4 p-md-5">
+        @Html.AntiForgeryToken()
+
+        <div class="row g-4">
+            <!-- Thông tin xưởng -->
+            <div class="col-lg-6">
+                <h4 class="fw-bold text-dark mb-3"><i class="bi bi-shop text-primary me-2"></i>1. Thông tin xưởng sản xuất</h4>
+                
+                <div class="mb-3">
+                    <label class="form-label fw-semibold fs-6">Tên xưởng / Cơ sở thủ công <span class="text-danger">*</span></label>
+                    <input name="StudioName" value="@Model.StudioName" class="form-control form-control-lg fs-6" required />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold fs-6">Nghề truyền thống đặc trưng <span class="text-danger">*</span></label>
+                    <input name="CraftType" value="@Model.CraftType" class="form-control form-control-lg fs-6" placeholder="Ví dụ: Gốm Bát Tràng, Dệt lụa Vạn Phúc..." required />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold fs-6">Làng nghề truyền thống</label>
+                    <select name="VillageId" asp-items="ViewBag.Villages" class="form-select form-select-lg fs-6">
+                        <option value="">-- Chọn làng nghề --</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold fs-6">Địa chỉ xưởng đón khách <span class="text-danger">*</span></label>
+                    <input name="Address" value="@Model.Address" class="form-control form-control-lg fs-6" required />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold fs-6">Giới thiệu về cơ sở và truyền thống gia đình <span class="text-danger">*</span></label>
+                    <textarea name="Bio" class="form-control fs-6" rows="5" required>@Model.Bio</textarea>
+                </div>
+            </div>
+
+            <!-- Tài khoản ngân hàng nhận doanh thu -->
+            <div class="col-lg-6">
+                <div class="p-4 bg-light rounded-4 border mb-4">
+                    <h4 class="fw-bold text-dark mb-3"><i class="bi bi-bank text-primary me-2"></i>2. Tài khoản ngân hàng nhận tiền</h4>
+                    <p class="text-muted fs-6 mb-4">Khi bác yêu cầu rút tiền từ ví, hệ thống sẽ chuyển khoản tự động về số tài khoản này.</p>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold fs-6">Tên ngân hàng <span class="text-danger">*</span></label>
+                        <input name="BankName" value="@Model.BankName" class="form-control form-control-lg fs-6" placeholder="Ví dụ: Vietcombank, BIDV, Agribank..." required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold fs-6">Số tài khoản ngân hàng <span class="text-danger">*</span></label>
+                        <input name="BankAccountNumber" value="@Model.BankAccountNumber" class="form-control form-control-lg fs-5 font-monospace fw-bold" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold fs-6">Tên chủ tài khoản (viết hoa không dấu) <span class="text-danger">*</span></label>
+                        <input name="BankAccountName" value="@Model.BankAccountName" class="form-control form-control-lg fs-6 text-uppercase fw-bold" required />
+                    </div>
+
+                    <input type="hidden" name="IdCardNumber" value="@(Model.IdCardNumber ?? "001234567890")" />
+                </div>
+
+                <div class="p-4 bg-light rounded-4 border">
+                    <h5 class="fw-bold mb-2"><i class="bi bi-shield-lock text-success me-2"></i>Bảo mật và an tâm</h5>
+                    <p class="text-muted small mb-0">
+                        Thông tin tài khoản ngân hàng của bác được mã hóa và bảo mật nghiêm ngặt. CraftTrip cam kết không bao giờ yêu cầu mã OTP hoặc mật khẩu ngân hàng của đối tác.
+                    </p>
+                </div>
+
+                <div class="d-grid mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg py-3 fs-5 fw-bold rounded-4 shadow">
+                        <i class="bi bi-check-circle-fill me-2"></i> Lưu cập nhật hồ sơ
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>

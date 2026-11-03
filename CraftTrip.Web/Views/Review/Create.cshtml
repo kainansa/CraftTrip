@@ -1,0 +1,47 @@
+@model CraftTrip.Web.ViewModels.ReviewSubmitViewModel
+@{
+    ViewData["Title"] = "Đánh giá trải nghiệm";
+}
+
+<div class="container py-5">
+    <div class="max-w-600 mx-auto">
+        <div class="card border-0 shadow-lg rounded-4 p-4 p-md-5 bg-white">
+            <span class="badge bg-gold text-dark align-self-start mb-2 px-3 py-1">Đánh giá khách hàng</span>
+            <h3 class="font-serif fw-bold mb-1">Cảm nhận của bạn về buổi trải nghiệm</h3>
+            <p class="text-muted small mb-4">@Model.WorkshopTitle</p>
+
+            <form asp-action="Create" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="WorkshopId" />
+                <input type="hidden" asp-for="BookingId" />
+                <input type="hidden" asp-for="WorkshopTitle" />
+
+                <div class="mb-4 text-center">
+                    <label class="form-label small fw-bold text-muted d-block mb-2">Chấm điểm số sao:</label>
+                    <div class="d-inline-flex gap-2 p-2 bg-light rounded-pill border">
+                        @for (int i = 1; i <= 5; i++)
+                        {
+                            <div class="form-check form-check-inline m-0">
+                                <input class="form-check-input visually-hidden" type="radio" asp-for="Rating" value="@i" id="star_@i" checked="@(Model.Rating == i)" />
+                                <label class="form-check-label px-2 py-1 fs-4 text-warning cursor-pointer" for="star_@i" style="cursor: pointer;">
+                                    <i class="bi bi-star-fill"></i>
+                                    <div class="small text-dark" style="font-size: 0.75rem;">@i sao</div>
+                                </label>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label asp-for="Comment" class="form-label small fw-semibold">Nội dung đánh giá chi tiết *</label>
+                    <textarea asp-for="Comment" class="form-control" rows="5" placeholder="Bạn cảm thấy không gian xưởng thế nào? Sự hướng dẫn của nghệ nhân ra sao? Sản phẩm mang về có đẹp không?..."></textarea>
+                    <span asp-validation-for="Comment" class="text-danger small"></span>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 py-3 fw-bold fs-6">
+                    <i class="bi bi-send me-1"></i> Gửi bài đánh giá
+                </button>
+            </form>
+        </div>
+    </div>
+</div>

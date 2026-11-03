@@ -1,0 +1,166 @@
+@model CraftTrip.Web.ViewModels.HostScheduleManageViewModel
+@{
+    ViewData["Title"] = "Quản lý lịch đón khách - " + Model.WorkshopTitle;
+}
+
+<div class="host-container py-4">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+        <div>
+            <a asp-controller="Workshop" asp-action="Index" class="btn btn-outline-secondary btn-sm mb-2 rounded-pill px-3">
+                <i class="bi bi-arrow-left me-1"></i> Danh sách Workshop
+            </a>
+            <h1 class="h2 fw-bold text-dark mb-1">Lịch đón khách trải nghiệm</h1>
+            <p class="text-muted fs-6 mb-0">Workshop: <strong class="text-primary">@Model.WorkshopTitle</strong></p>
+        </div>
+        <a asp-action="Manage" asp-route-workshopId="@Model.WorkshopId" class="btn btn-outline-primary rounded-pill px-3">
+            <i class="bi bi-arrow-clockwise me-1"></i> Làm mới trang
+        </a>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show rounded-4 p-3 mb-4 shadow-sm" role="alert">
+            <i class="bi bi-check-circle-fill me-2 fs-5"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show rounded-4 p-3 mb-4 shadow-sm" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="row g-4">
+        <!-- Cột bên trái: Mở ca đón khách mới -->
+        <div class="col-lg-5">
+            <div class="card shadow-sm border-0 rounded-4 p-4 sticky-top" style="top: 20px;">
+                <h4 class="fw-bold text-dark mb-3"><i class="bi bi-calendar-plus text-primary me-2"></i>Mở ca đón khách mới</h4>
+                <p class="text-muted fs-6 mb-4">Chọn ngày và khung giờ bạn sẵn sàng đón tiếp khách tại xưởng.</p>
+
+                <form asp-action="AddSlot" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="WorkshopId" />
+
+                    <div class="mb-3">
+                        <label asp-for="SelectedDate" class="form-label fw-semibold fs-6">1. Chọn ngày đón khách</label>
+                        <input asp-for="SelectedDate" type="date" class="form-control form-control-lg fs-5 fw-bold" min="@DateTime.UtcNow.ToString("yyyy-MM-dd")" />
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label fw-semibold fs-6">2. Giờ bắt đầu</label>
+                            <input asp-for="StartTime" type="time" class="form-control form-control-lg fs-5" />
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-semibold fs-6">Giờ kết thúc</label>
+                            <input asp-for="EndTime" type="time" class="form-control form-control-lg fs-5" />
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="MaxCapacity" class="form-label fw-semibold fs-6">3. Số lượng khách tối đa trong ca này</label>
+                        <div class="input-group input-group-lg">
+                            <input asp-for="MaxCapacity" type="number" min="1" max="100" class="form-control fs-5 fw-bold text-center" />
+                            <span class="input-group-text">khách</span>
+                        </div>
+                        <small class="text-muted">Không nhận quá số lượng này để bảo đảm chất lượng trải nghiệm.</small>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg w-100 py-3 fs-5 fw-bold rounded-4 shadow">
+                        <i class="bi bi-plus-circle-fill me-2"></i> Mở ca đón khách
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Cột bên phải: Danh sách các ca đã mở -->
+        <div class="col-lg-7">
+            <div class="card shadow-sm border-0 rounded-4 p-4">
+                <h4 class="fw-bold text-dark mb-3"><i class="bi bi-clock-history text-primary me-2"></i>Các ca đang mở đón khách</h4>
+                
+                @if (Model.ExistingSchedules == null || !Model.ExistingSchedules.Any())
+                {
+                    <div class="text-center py-5">
+                        <i class="bi bi-calendar-x text-muted" style="font-size: 3.5rem;"></i>
+                        <h5 class="fw-bold mt-3 text-secondary">Chưa có lịch nào được mở</h5>
+                        <p class="text-muted fs-6 mb-0">Bác vui lòng điền thông tin ở khung bên trái để mở ca đón khách đầu tiên!</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="accordion accordion-flush" id="schedulesAccordion">
+                        @foreach (var schedule in Model.ExistingSchedules.OrderBy(s => s.Date))
+                        {
+                            var collapseId = "sched_" + schedule.Id.ToString("N");
+                            <div class="accordion-item border rounded-3 mb-3 overflow-hidden shadow-xs">
+                                <h2 class="accordion-header" id="heading_@collapseId">
+                                    <button class="accordion-button bg-light py-3 px-4 fs-6 fw-bold text-dark" type="button" data-bs-toggle="collapse" data-bs-target="#@collapseId" aria-expanded="true">
+                                        <i class="bi bi-calendar-event text-primary me-2 fs-5"></i>
+                                        <span>Ngày @schedule.Date.ToString("dddd, dd/MM/yyyy", new System.Globalization.CultureInfo("vi-VN"))</span>
+                                        <span class="badge bg-secondary ms-auto me-3 font-monospace">@schedule.Slots.Count ca</span>
+                                    </button>
+                                </h2>
+                                <div id="@collapseId" class="accordion-collapse collapse show">
+                                    <div class="accordion-body p-3">
+                                        @if (!schedule.Slots.Any())
+                                        {
+                                            <p class="text-muted mb-0 small">Chưa có ca nào trong ngày này.</p>
+                                        }
+                                        else
+                                        {
+                                            <div class="list-group list-group-flush gap-2">
+                                                @foreach (var slot in schedule.Slots.OrderBy(s => s.StartTime))
+                                                {
+                                                    var bookedCount = slot.MaxCapacity - slot.AvailableCapacity;
+                                                    <div class="list-group-item d-flex flex-wrap align-items-center justify-content-between p-3 border rounded-3 bg-white">
+                                                        <div class="d-flex align-items-center gap-3">
+                                                            <div class="p-2 bg-light rounded text-center" style="min-width: 100px;">
+                                                                <span class="fs-5 fw-bold text-primary">@slot.StartTime.ToString(@"hh\:mm")</span>
+                                                                <div class="small text-muted">đến @slot.EndTime.ToString(@"hh\:mm")</div>
+                                                            </div>
+                                                            <div>
+                                                                <div class="fw-semibold fs-6">
+                                                                    Đã đặt: <span class="badge bg-primary fs-6">@bookedCount / @slot.MaxCapacity khách</span>
+                                                                </div>
+                                                                <small class="text-muted">
+                                                                    Còn trống: <strong class="text-success">@slot.AvailableCapacity</strong> chỗ
+                                                                </small>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="mt-2 mt-md-0">
+                                                            @if (bookedCount == 0)
+                                                            {
+                                                                <form asp-action="DeleteSlot" method="post" onsubmit="return confirm('Bác có chắc muốn đóng ca trải nghiệm này?');">
+                                                                    @Html.AntiForgeryToken()
+                                                                    <input type="hidden" name="slotId" value="@slot.Id" />
+                                                                    <input type="hidden" name="workshopId" value="@Model.WorkshopId" />
+                                                                    <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3 py-2">
+                                                                        <i class="bi bi-trash me-1"></i> Xóa ca
+                                                                    </button>
+                                                                </form>
+                                                            }
+                                                            else
+                                                            {
+                                                                <span class="badge bg-light text-muted border px-3 py-2">
+                                                                    <i class="bi bi-lock me-1"></i> Có khách đã đặt
+                                                                </span>
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                }
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

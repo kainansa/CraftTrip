@@ -1,0 +1,61 @@
+@model CraftTrip.Core.Entities.ApplicationUser
+@{
+    ViewData["Title"] = "Tài khoản của tôi";
+}
+
+<div class="container py-4">
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index" class="text-decoration-none">Trang chủ</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Hồ sơ cá nhân</li>
+        </ol>
+    </nav>
+
+    <div class="max-w-700 mx-auto">
+        <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white">
+            <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom">
+                <div class="bg-wood text-white rounded-circle d-flex align-items-center justify-content-center fs-2 fw-bold" style="width: 72px; height: 72px;">
+                    @(Model.FullName.FirstOrDefault())
+                </div>
+                <div>
+                    <h4 class="fw-bold mb-1">@Model.FullName</h4>
+                    <span class="badge bg-warning text-dark">Vai trò: @Model.UserRole</span>
+                </div>
+            </div>
+
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <label class="small text-muted fw-bold">Địa chỉ Email</label>
+                    <div class="p-2 bg-light rounded-3 fw-semibold">@Model.Email</div>
+                </div>
+                <div class="col-md-6">
+                    <label class="small text-muted fw-bold">Số điện thoại</label>
+                    <div class="p-2 bg-light rounded-3 fw-semibold">@(Model.PhoneNumber ?? "Chưa cập nhật")</div>
+                </div>
+                <div class="col-md-6">
+                    <label class="small text-muted fw-bold">Ngày tham gia</label>
+                    <div class="p-2 bg-light rounded-3 fw-semibold">@Model.CreatedAt.ToString("dd/MM/yyyy")</div>
+                </div>
+                <div class="col-md-6">
+                    <label class="small text-muted fw-bold">Trạng thái tài khoản</label>
+                    <div class="p-2 bg-light rounded-3 text-success fw-semibold"><i class="bi bi-check-circle-fill me-1"></i> Đang hoạt động</div>
+                </div>
+            </div>
+
+            <div class="d-flex flex-wrap gap-2 pt-3 border-top">
+                <a asp-controller="Booking" asp-action="History" class="btn btn-outline-primary btn-sm px-3">
+                    <i class="bi bi-ticket-perforated me-1"></i> Xem đơn vé của tôi
+                </a>
+                <a asp-controller="Account" asp-action="Favorites" class="btn btn-outline-secondary btn-sm px-3">
+                    <i class="bi bi-heart me-1"></i> Danh sách yêu thích
+                </a>
+                @if (User.IsInRole("Host"))
+                {
+                    <a asp-area="Host" asp-controller="Dashboard" asp-action="Index" class="btn btn-primary btn-sm px-3 ms-auto">
+                        <i class="bi bi-shop me-1"></i> Kênh quản lý Xưởng
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+</div>

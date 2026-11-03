@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="CraftTrip.Core/CraftTrip.Core.csproj" />
+  <Project Path="CraftTrip.Infrastructure/CraftTrip.Infrastructure.csproj" />
+  <Project Path="CraftTrip.Services/CraftTrip.Services.csproj" />
+  <Project Path="CraftTrip.Tests/CraftTrip.Tests.csproj" />
+  <Project Path="CraftTrip.Web/CraftTrip.Web.csproj" />
+</Solution>

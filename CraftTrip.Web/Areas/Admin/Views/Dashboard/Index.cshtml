@@ -1,0 +1,177 @@
+@model CraftTrip.Web.ViewModels.AdminDashboardViewModel
+@{
+    ViewData["Title"] = "Bảng điều khiển Quản trị";
+}
+
+<div class="admin-container py-4">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+        <div>
+            <h1 class="h2 fw-bold text-dark mb-1">Tổng quan Hệ thống CraftTrip</h1>
+            <p class="text-muted fs-6 mb-0">Theo dõi hoạt động, duyệt nội dung và quản trị toàn diện nền tảng du lịch làng nghề</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a asp-controller="Approval" asp-action="Index" class="btn btn-warning text-dark fw-bold rounded-pill px-3 shadow-sm">
+                <i class="bi bi-clock-history me-1"></i> Hồ sơ chờ duyệt (@(Model.PendingWorkshops.Count + Model.PendingRevisions.Count))
+            </a>
+            <a asp-controller="Financial" asp-action="Index" class="btn btn-primary rounded-pill px-3 shadow-sm">
+                <i class="bi bi-cash-stack me-1"></i> Tài chính & Đối soát
+            </a>
+        </div>
+    </div>
+
+    <!-- 4 Khối thống kê chính -->
+    <div class="row g-4 mb-4">
+        <div class="col-sm-6 col-xl-3">
+            <div class="card shadow-sm border-0 rounded-4 p-4 h-100 bg-white">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="fs-6 text-muted">Workshop hoạt động</span>
+                    <i class="bi bi-compass fs-3 text-primary"></i>
+                </div>
+                <h2 class="fw-bold text-dark mb-0">@Model.Stats.TotalWorkshopsCount</h2>
+                <small class="text-success mt-2 d-block"><i class="bi bi-check2-circle"></i> Đang mở bán công khai</small>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="card shadow-sm border-0 rounded-4 p-4 h-100 bg-white">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="fs-6 text-muted">Nghệ nhân / Xưởng</span>
+                    <i class="bi bi-people fs-3 text-info"></i>
+                </div>
+                <h2 class="fw-bold text-dark mb-0">@Model.Stats.TotalHostsCount</h2>
+                <small class="text-muted mt-2 d-block"><i class="bi bi-patch-check text-info"></i> Cơ sở sản xuất liên kết</small>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="card shadow-sm border-0 rounded-4 p-4 h-100 bg-white">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="fs-6 text-muted">Lượt đặt vé</span>
+                    <i class="bi bi-ticket-perforated fs-3 text-warning"></i>
+                </div>
+                <h2 class="fw-bold text-dark mb-0">@Model.Stats.TotalBookingsCount</h2>
+                <small class="text-muted mt-2 d-block">Từ khách du lịch toàn quốc</small>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="card shadow-sm border-0 rounded-4 p-4 h-100 bg-white">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="fs-6 text-muted">Hoa hồng nền tảng</span>
+                    <i class="bi bi-cash-coin fs-3 text-success"></i>
+                </div>
+                <h2 class="fw-bold text-success mb-0">@Model.Stats.TotalPlatformEarnings.ToString("N0") đ</h2>
+                <small class="text-muted mt-2 d-block">Doanh thu thu từ hoa hồng</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hàng thứ hai: Hàng chờ duyệt & Đơn hàng gần đây -->
+    <div class="row g-4">
+        <!-- Hàng chờ duyệt -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0 rounded-4 p-4 h-100">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <h4 class="fw-bold text-dark mb-0"><i class="bi bi-hourglass-top text-warning me-2"></i>Yêu cầu cần kiểm duyệt</h4>
+                    <a asp-controller="Approval" asp-action="Index" class="btn btn-outline-primary btn-sm rounded-pill px-3">Xem tất cả</a>
+                </div>
+
+                @if (!Model.PendingWorkshops.Any() && !Model.PendingRevisions.Any() && !Model.PendingHosts.Any())
+                {
+                    <div class="text-center py-5 text-muted">
+                        <i class="bi bi-check-circle-fill text-success fs-1 mb-2 d-block"></i>
+                        Tuyệt vời! Không có yêu cầu nào đang chờ xử lý.
+                    </div>
+                }
+                else
+                {
+                    <div class="list-group list-group-flush gap-2">
+                        @foreach (var w in Model.PendingWorkshops.Take(3))
+                        {
+                            <div class="list-group-item p-3 border rounded-3 bg-light d-flex align-items-center justify-content-between">
+                                <div>
+                                    <span class="badge bg-primary mb-1">Workshop mới</span>
+                                    <div class="fw-bold text-dark">@w.Title</div>
+                                    <small class="text-muted">Host: @w.Host?.FullName | @w.Village?.Name</small>
+                                </div>
+                                <a asp-controller="Approval" asp-action="Index" class="btn btn-sm btn-outline-primary rounded-pill px-3">Xem xét</a>
+                            </div>
+                        }
+
+                        @foreach (var r in Model.PendingRevisions.Take(3))
+                        {
+                            <div class="list-group-item p-3 border rounded-3 bg-light d-flex align-items-center justify-content-between">
+                                <div>
+                                    <span class="badge bg-warning text-dark mb-1">Cập nhật nội dung</span>
+                                    <div class="fw-bold text-dark">@r.ProposedTitle</div>
+                                    <small class="text-muted">Workshop gốc: @r.Workshop?.Title</small>
+                                </div>
+                                <a asp-controller="Approval" asp-action="Index" class="btn btn-sm btn-outline-warning rounded-pill px-3">Xem sửa đổi</a>
+                            </div>
+                        }
+
+                        @foreach (var h in Model.PendingHosts.Take(3))
+                        {
+                            <div class="list-group-item p-3 border rounded-3 bg-light d-flex align-items-center justify-content-between">
+                                <div>
+                                    <span class="badge bg-info mb-1">Đăng ký nghệ nhân</span>
+                                    <div class="fw-bold text-dark">@h.StudioName</div>
+                                    <small class="text-muted">Chủ xưởng: @h.User?.FullName | Nghề: @h.CraftType</small>
+                                </div>
+                                <a asp-controller="User" asp-action="Hosts" class="btn btn-sm btn-outline-info rounded-pill px-3">Xác thực</a>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Đơn đặt chỗ mới nhất -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0 rounded-4 p-4 h-100">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <h4 class="fw-bold text-dark mb-0"><i class="bi bi-clock-history text-primary me-2"></i>Đơn đặt vé gần đây</h4>
+                    <a asp-controller="Financial" asp-action="Index" class="btn btn-outline-secondary btn-sm rounded-pill px-3">Xem thêm</a>
+                </div>
+
+                @if (!Model.RecentBookings.Any())
+                {
+                    <div class="text-center py-5 text-muted">
+                        Chưa có đơn đặt vé nào phát sinh.
+                    </div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0 fs-6">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Mã đơn</th>
+                                    <th>Khách hàng</th>
+                                    <th>Số tiền</th>
+                                    <th class="text-center">Trạng thái</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var b in Model.RecentBookings)
+                                {
+                                    <tr>
+                                        <td class="font-monospace fw-bold text-primary">@b.BookingCode</td>
+                                        <td>
+                                            <div class="fw-semibold">@b.CustomerName</div>
+                                            <small class="text-muted">@b.Quantity khách</small>
+                                        </td>
+                                        <td class="fw-bold">@b.TotalAmount.ToString("N0") đ</td>
+                                        <td class="text-center">
+                                            <span class="badge bg-secondary rounded-pill">@b.Status</span>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

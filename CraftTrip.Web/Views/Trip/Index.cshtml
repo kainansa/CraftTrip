@@ -1,0 +1,53 @@
+@model List<CraftTrip.Core.Entities.Trip>
+@{
+    ViewData["Title"] = "Chuyến đi Gợi ý Làng nghề";
+}
+
+<div class="container py-4">
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index" class="text-decoration-none">Trang chủ</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Chuyến đi gợi ý</li>
+        </ol>
+    </nav>
+
+    <div class="text-center max-w-700 mx-auto mb-5">
+        <h1 class="font-serif fs-1 fw-bold mb-2">Lộ trình Chuyến đi Làng nghề</h1>
+        <p class="text-muted">Lịch trình kết hợp hoàn hảo giữa học làm đồ thủ công cùng nghệ nhân, thưởng thức ẩm thực cổ truyền và check-in các điểm di tích lân cận.</p>
+    </div>
+
+    <div class="row g-4">
+        @foreach (var trip in Model)
+        {
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100 bg-white">
+                    <div class="row g-0 h-100">
+                        <div class="col-md-5">
+                            <img src="@trip.CoverImageUrl" alt="@trip.Title" class="w-100 h-100 object-fit-cover" style="min-height: 250px;" />
+                        </div>
+                        <div class="col-md-7 p-4 d-flex flex-column">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="badge bg-secondary-subtle text-secondary small">
+                                    <i class="bi bi-clock me-1"></i> @trip.DurationDescription
+                                </span>
+                                <span class="fw-bold text-terracotta">~@trip.EstimatedCost.ToString("N0") đ</span>
+                            </div>
+                            <h5 class="fw-bold mb-2">
+                                <a asp-action="Details" asp-route-slug="@trip.Slug" class="text-decoration-none text-dark">
+                                    @trip.Title
+                                </a>
+                            </h5>
+                            <p class="text-muted small mb-3 flex-grow-1">@trip.ShortDescription</p>
+                            <div class="small text-muted mb-3">
+                                <i class="bi bi-geo-alt text-danger me-1"></i> @(trip.Village?.Name ?? "Làng nghề Hà Nội") • @trip.Itineraries.Count chặng dừng
+                            </div>
+                            <a asp-action="Details" asp-route-slug="@trip.Slug" class="btn btn-sm btn-outline-primary mt-auto align-self-start">
+                                Xem lịch trình chi tiết <i class="bi bi-arrow-right ms-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

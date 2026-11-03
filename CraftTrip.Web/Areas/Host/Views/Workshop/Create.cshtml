@@ -1,0 +1,228 @@
+@model CraftTrip.Web.ViewModels.HostWorkshopWizardViewModel
+@{
+    ViewData["Title"] = "Đăng Workshop mới";
+}
+
+<div class="max-w-800 mx-auto py-2">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <span class="badge bg-gold text-dark mb-1">Hướng dẫn từng bước cho Nghệ nhân</span>
+            <h2 class="font-serif fw-bold mb-0">Đăng Workshop Trải nghiệm mới</h2>
+        </div>
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Quay lại
+        </a>
+    </div>
+
+    <form asp-action="Create" method="post" id="workshopForm">
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger border-0 small py-2 mb-4"></div>
+
+        <!-- BƯỚC 1: THÔNG TIN CƠ BẢN -->
+        <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white mb-4">
+            <div class="d-flex align-items-center gap-3 mb-4 pb-2 border-bottom">
+                <span class="badge bg-primary fs-5 px-3 py-2 rounded-circle">1</span>
+                <div>
+                    <h4 class="font-serif fw-bold mb-0">Thông tin cơ bản</h4>
+                    <p class="text-muted small mb-0">Đặt tên và phân loại ngành nghề truyền thống</p>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label asp-for="Title" class="form-label fs-6 fw-bold">1. Tên Workshop trải nghiệm *</label>
+                <input asp-for="Title" class="form-control form-control-lg" placeholder="Ví dụ: Tự tay vuốt gốm Bát Tràng và vẽ men lam cùng nghệ nhân" />
+                <span asp-validation-for="Title" class="text-danger small"></span>
+                <small class="text-muted d-block mt-1">Nên đặt tên gợi mở hành động cụ thể để khách du lịch hào hứng đăng ký.</small>
+            </div>
+
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <label asp-for="CategoryId" class="form-label fs-6 fw-bold">2. Ngành thủ công *</label>
+                    <select asp-for="CategoryId" asp-items="ViewBag.Categories" class="form-select form-select-lg">
+                        <option value="">-- Chọn thể loại thủ công --</option>
+                    </select>
+                    <span asp-validation-for="CategoryId" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="VillageId" class="form-label fs-6 fw-bold">3. Làng nghề của bạn</label>
+                    <select asp-for="VillageId" asp-items="ViewBag.Villages" class="form-select form-select-lg">
+                        <option value="">-- Chọn làng nghề truyền thống --</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label asp-for="ShortDescription" class="form-label fs-6 fw-bold">4. Lời giới thiệu ngắn (1-2 câu tóm tắt) *</label>
+                <textarea asp-for="ShortDescription" class="form-control" rows="2" placeholder="Ví dụ: Dành 2 tiếng đắm mình bên bàn xoay gốm cổ, học cách đặt tâm đất sét và tự tay vẽ men lam mang về."></textarea>
+                <span asp-validation-for="ShortDescription" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-2">
+                <label asp-for="FullDescription" class="form-label fs-6 fw-bold">5. Giới thiệu chi tiết về không gian và trải nghiệm tại xưởng *</label>
+                <textarea asp-for="FullDescription" class="form-control" rows="5" placeholder="Kể cho khách nghe về lịch sử gia đình, không gian xưởng và cảm xúc mà buổi trải nghiệm sẽ mang lại..."></textarea>
+                <span asp-validation-for="FullDescription" class="text-danger small"></span>
+            </div>
+        </div>
+
+        <!-- BƯỚC 2: HÌNH ẢNH TRẢI NGHIỆM -->
+        <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white mb-4">
+            <div class="d-flex align-items-center gap-3 mb-4 pb-2 border-bottom">
+                <span class="badge bg-primary fs-5 px-3 py-2 rounded-circle">2</span>
+                <div>
+                    <h4 class="font-serif fw-bold mb-0">Hình ảnh xưởng & Trải nghiệm</h4>
+                    <p class="text-muted small mb-0">Tải ảnh chụp thật tại xưởng để khách tin tưởng lựa chọn</p>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label fs-6 fw-bold">Ảnh bìa chính của Workshop *</label>
+                <input type="hidden" asp-for="CoverImageUrl" id="coverImageUrlInput" />
+
+                <div class="p-4 border-2 border-dashed rounded-4 text-center bg-light mb-3">
+                    <div id="imagePreviewContainer" class="mb-3 d-none">
+                        <img id="imagePreview" src="" alt="Ảnh xem trước" class="rounded-3 shadow-sm object-fit-cover" style="max-height: 240px; width: 100%;" />
+                    </div>
+                    <i class="bi bi-cloud-arrow-up fs-1 text-muted d-block mb-2"></i>
+                    <p class="small text-muted mb-3">Bấm nút bên dưới để chọn ảnh từ máy tính hoặc điện thoại của bạn</p>
+                    <input type="file" id="fileUploadInput" class="d-none" accept="image/*" onchange="uploadImage(this)" />
+                    <button type="button" class="btn btn-outline-primary host-btn-lg" onclick="document.getElementById('fileUploadInput').click()">
+                        <i class="bi bi-camera"></i> Chọn ảnh tải lên ngay
+                    </button>
+                    <div id="uploadSpinner" class="spinner-border spinner-border-sm text-primary ms-2 d-none" role="status"></div>
+                </div>
+                <small class="text-muted">Hoặc nếu chưa có ảnh ngay, hệ thống sẽ tự động gán ảnh đại diện làng nghề phù hợp.</small>
+            </div>
+        </div>
+
+        <!-- BƯỚC 3: NỘI DUNG THỰC HÀNH -->
+        <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white mb-4">
+            <div class="d-flex align-items-center gap-3 mb-4 pb-2 border-bottom">
+                <span class="badge bg-primary fs-5 px-3 py-2 rounded-circle">3</span>
+                <div>
+                    <h4 class="font-serif fw-bold mb-0">Nội dung thực hành</h4>
+                    <p class="text-muted small mb-0">Liệt kê rõ ràng để khách nắm được các hoạt động</p>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label asp-for="ExperienceSteps" class="form-label fs-6 fw-bold">Các công đoạn khách sẽ được làm *</label>
+                <textarea asp-for="ExperienceSteps" class="form-control" rows="4" placeholder="1. Giới thiệu nguyên vật liệu và không gian xưởng&#10;2. Nghệ nhân hướng dẫn thao tác mẫu&#10;3. Khách tự tay thực hành nhào nặn / đưa thoi / đan nan...&#10;4. Hoàn thiện và đóng gói sản phẩm"></textarea>
+                <span asp-validation-for="ExperienceSteps" class="text-danger small"></span>
+            </div>
+
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <label asp-for="TakeHomeProduct" class="form-label fs-6 fw-bold">Sản phẩm tự tay làm mang về *</label>
+                    <input asp-for="TakeHomeProduct" class="form-control" placeholder="Ví dụ: 1 chiếc cốc gốm nung hoàn thiện" />
+                    <span asp-validation-for="TakeHomeProduct" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="TargetAudience" class="form-label fs-6 fw-bold">Phù hợp với ai? *</label>
+                    <input asp-for="TargetAudience" class="form-control" placeholder="Ví dụ: Gia đình, Trẻ em từ 6 tuổi, Cặp đôi..." />
+                    <span asp-validation-for="TargetAudience" class="text-danger small"></span>
+                </div>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label asp-for="IncludedServices" class="form-label fs-6 fw-bold">Dịch vụ bao gồm trong vé</label>
+                    <input asp-for="IncludedServices" class="form-control" placeholder="Nguyên liệu, tạp dề, trà nước, hộp quà mang về" />
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="PreparationGuide" class="form-label fs-6 fw-bold">Lưu ý khách cần chuẩn bị</label>
+                    <input asp-for="PreparationGuide" class="form-control" placeholder="Mặc trang phục thoải mái, cắt gọn móng tay" />
+                </div>
+            </div>
+        </div>
+
+        <!-- BƯỚC 4: GIÁ VÉ & THỜI LƯỢNG -->
+        <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white mb-4">
+            <div class="d-flex align-items-center gap-3 mb-4 pb-2 border-bottom">
+                <span class="badge bg-primary fs-5 px-3 py-2 rounded-circle">4</span>
+                <div>
+                    <h4 class="font-serif fw-bold mb-0">Giá vé & Thời gian</h4>
+                    <p class="text-muted small mb-0">Thiết lập mức giá và giới hạn số lượng khách</p>
+                </div>
+            </div>
+
+            <div class="row g-4 mb-4">
+                <div class="col-md-6">
+                    <label asp-for="BasePrice" class="form-label fs-6 fw-bold">Giá vé cho mỗi khách (VNĐ) *</label>
+                    <div class="input-group input-group-lg">
+                        <input asp-for="BasePrice" class="form-control" type="number" step="10000" min="50000" />
+                        <span class="input-group-text">đ / người</span>
+                    </div>
+                    <span asp-validation-for="BasePrice" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="DurationMinutes" class="form-label fs-6 fw-bold">Thời lượng buổi trải nghiệm *</label>
+                    <div class="input-group input-group-lg">
+                        <input asp-for="DurationMinutes" class="form-control" type="number" min="30" max="480" />
+                        <span class="input-group-text">phút</span>
+                    </div>
+                    <span asp-validation-for="DurationMinutes" class="text-danger small"></span>
+                </div>
+            </div>
+
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <label asp-for="MaxParticipants" class="form-label fs-6 fw-bold">Số lượng khách tối đa mỗi ca *</label>
+                    <input asp-for="MaxParticipants" class="form-control form-control-lg" type="number" min="1" max="100" />
+                    <span asp-validation-for="MaxParticipants" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="LocationAddress" class="form-label fs-6 fw-bold">Địa chỉ đón khách của xưởng *</label>
+                    <input asp-for="LocationAddress" class="form-control form-control-lg" placeholder="Số nhà, ngõ ngách, thôn xóm..." />
+                    <span asp-validation-for="LocationAddress" class="text-danger small"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- BƯỚC 5: NÚT HÀNH ĐỘNG DÀNH CHO NGHỆ NHÂN -->
+        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white mb-5">
+            <div class="d-flex flex-column flex-md-row gap-3 justify-content-end">
+                <button type="submit" name="actionType" value="draft" class="btn btn-outline-secondary host-btn-lg flex-grow-1 flex-md-grow-0">
+                    <i class="bi bi-save"></i> Lưu bản nháp (Chưa gửi duyệt)
+                </button>
+                <button type="submit" name="actionType" value="submit" class="btn btn-primary host-btn-lg flex-grow-1 flex-md-grow-0">
+                    <i class="bi bi-send-check"></i> Hoàn thành & Gửi duyệt ngay
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        function uploadImage(input) {
+            if (!input.files || input.files.length === 0) return;
+            const file = input.files[0];
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const spinner = document.getElementById('uploadSpinner');
+            spinner.classList.remove('d-none');
+
+            fetch('@Url.Action("UploadImage", "Workshop", new { area = "Host" })', {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                spinner.classList.add('d-none');
+                if (data.url) {
+                    document.getElementById('coverImageUrlInput').value = data.url;
+                    document.getElementById('imagePreview').src = data.url;
+                    document.getElementById('imagePreviewContainer').classList.remove('d-none');
+                } else {
+                    alert('Không thể tải ảnh lên. Vui lòng thử lại.');
+                }
+            })
+            .catch(err => {
+                spinner.classList.add('d-none');
+                alert('Có lỗi khi tải ảnh lên.');
+            });
+        }
+    </script>
+}

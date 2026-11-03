@@ -1,0 +1,154 @@
+@model CraftTrip.Core.Entities.Booking
+@using CraftTrip.Core.Enums
+@{
+    ViewData["Title"] = "Chi tiết đặt chỗ #" + Model.BookingCode;
+}
+
+<div class="host-container py-4">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+        <div>
+            <a asp-action="Index" class="btn btn-outline-secondary btn-sm mb-2 rounded-pill px-3">
+                <i class="bi bi-arrow-left me-1"></i> Quay lại danh sách đặt chỗ
+            </a>
+            <h1 class="h2 fw-bold text-dark mb-1">Chi tiết đơn đặt chỗ</h1>
+            <p class="text-muted fs-6 mb-0">Mã đơn: <strong class="text-primary font-monospace">@Model.BookingCode</strong></p>
+        </div>
+        <div>
+            @switch (Model.Status)
+            {
+                case BookingStatus.Pending:
+                    <span class="badge bg-warning text-dark px-4 py-2 fs-6 rounded-pill">Chờ thanh toán</span>
+                    break;
+                case BookingStatus.Confirmed:
+                    <span class="badge bg-primary px-4 py-2 fs-6 rounded-pill">Đã xác nhận</span>
+                    break;
+                case BookingStatus.Completed:
+                    <span class="badge bg-success px-4 py-2 fs-6 rounded-pill">Đã hoàn thành</span>
+                    break;
+                case BookingStatus.Canceled:
+                    <span class="badge bg-danger px-4 py-2 fs-6 rounded-pill">Đã hủy</span>
+                    break;
+                default:
+                    <span class="badge bg-secondary px-4 py-2 fs-6 rounded-pill">@Model.Status</span>
+                    break;
+            }
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0 rounded-4 p-4 mb-4">
+                <h4 class="fw-bold text-dark mb-3"><i class="bi bi-compass text-primary me-2"></i>Thông tin Workshop & Buổi trải nghiệm</h4>
+                <div class="p-3 bg-light rounded-3 mb-3">
+                    <h5 class="fw-bold mb-2">@Model.Slot?.Schedule?.Workshop?.Title</h5>
+                    <p class="text-muted mb-2"><i class="bi bi-geo-alt me-1 text-danger"></i> @Model.Slot?.Schedule?.Workshop?.LocationAddress</p>
+                    <div class="d-flex flex-wrap gap-4 pt-2 border-top">
+                        <div>
+                            <small class="text-muted d-block">Ngày trải nghiệm:</small>
+                            <strong class="fs-6 text-dark"><i class="bi bi-calendar3 me-1"></i>@Model.Slot?.Schedule?.Date.ToString("dddd, dd/MM/yyyy", new System.Globalization.CultureInfo("vi-VN"))</strong>
+                        </div>
+                        <div>
+                            <small class="text-muted d-block">Khung giờ:</small>
+                            <strong class="fs-6 text-dark"><i class="bi bi-clock me-1"></i>@Model.Slot?.StartTime.ToString(@"hh\:mm") - @Model.Slot?.EndTime.ToString(@"hh\:mm")</strong>
+                        </div>
+                        <div>
+                            <small class="text-muted d-block">Số lượng khách:</small>
+                            <strong class="fs-6 text-primary"><i class="bi bi-people me-1"></i>@Model.Quantity người</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <h5 class="fw-bold text-dark mt-4 mb-3"><i class="bi bi-person text-primary me-2"></i>Thông tin người đại diện đặt chỗ</h5>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="border p-3 rounded-3">
+                            <small class="text-muted d-block">Họ và tên:</small>
+                            <span class="fs-6 fw-bold">@Model.CustomerName</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="border p-3 rounded-3">
+                            <small class="text-muted d-block">Số điện thoại liên hệ:</small>
+                            <a href="tel:@Model.CustomerPhone" class="fs-6 fw-bold text-primary">@Model.CustomerPhone</a>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="border p-3 rounded-3">
+                            <small class="text-muted d-block">Địa chỉ Email:</small>
+                            <span class="fs-6">@Model.CustomerEmail</span>
+                        </div>
+                    </div>
+                    @if (!string.IsNullOrEmpty(Model.SpecialNotes))
+                    {
+                        <div class="col-md-12">
+                            <div class="border p-3 rounded-3 bg-light">
+                                <small class="text-muted d-block">Ghi chú / Yêu cầu đặc biệt:</small>
+                                <span class="fs-6 fst-italic">"@Model.SpecialNotes"</span>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Vé vào xưởng & Check-in -->
+            <div class="card shadow-sm border-0 rounded-4 p-4">
+                <h4 class="fw-bold text-dark mb-3"><i class="bi bi-qr-code text-primary me-2"></i>Vé & Điểm danh vào xưởng</h4>
+                @if (Model.Ticket != null)
+                {
+                    <div class="p-3 border rounded-3 bg-light d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="font-monospace fw-bold fs-6 text-dark">Mã vé: @Model.Ticket.TicketCode</div>
+                            <small class="text-muted">Tạo lúc: @Model.Ticket.CreatedAt.ToString("HH:mm dd/MM/yyyy")</small>
+                        </div>
+                        <div>
+                            @if (Model.Ticket.IsRedeemed)
+                            {
+                                <span class="badge bg-success px-3 py-2 fs-6 rounded-pill">
+                                    <i class="bi bi-check2-all me-1"></i> Đã điểm danh (@Model.Ticket.RedeemedAt?.ToString("HH:mm dd/MM"))
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-warning text-dark px-3 py-2 fs-6 rounded-pill">
+                                    <i class="bi bi-hourglass-split me-1"></i> Chưa điểm danh
+                                </span>
+                            }
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted mb-0">Vé chưa được phát hành hoặc đơn chưa thanh toán.</p>
+                }
+            </div>
+        </div>
+
+        <!-- Cột phải: Tài chính đơn hàng -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0 rounded-4 p-4">
+                <h4 class="fw-bold text-dark mb-3"><i class="bi bi-cash-coin text-success me-2"></i>Tài chính đơn hàng</h4>
+                
+                <div class="list-group list-group-flush mb-4">
+                    <div class="list-group-item d-flex justify-content-between px-0 py-2 border-0">
+                        <span class="text-muted">Tổng tiền khách trả:</span>
+                        <strong class="fs-6">@Model.TotalAmount.ToString("N0") đ</strong>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between px-0 py-2 border-0">
+                        <span class="text-muted">Phí nền tảng (@(Model.CommissionRate * 100)%):</span>
+                        <span class="text-danger">- @Model.PlatformFee.ToString("N0") đ</span>
+                    </div>
+                    <hr class="my-2" />
+                    <div class="list-group-item d-flex justify-content-between px-0 py-2 border-0 bg-light p-3 rounded-3">
+                        <span class="fw-bold text-dark fs-6">Thực nhận về ví xưởng:</span>
+                        <strong class="fs-5 text-success">@Model.HostEarnings.ToString("N0") đ</strong>
+                    </div>
+                </div>
+
+                <div class="alert alert-secondary rounded-3 small mb-0">
+                    <i class="bi bi-shield-check text-primary me-1"></i>
+                    Tiền thanh toán sẽ tự động cộng vào ví của bác đúng <strong>24 giờ</strong> sau khi buổi trải nghiệm kết thúc (theo chính sách nền tảng).
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

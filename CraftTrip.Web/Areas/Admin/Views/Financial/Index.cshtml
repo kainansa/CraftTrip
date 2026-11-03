@@ -1,0 +1,218 @@
+@model CraftTrip.Web.ViewModels.AdminFinancialDashboardViewModel
+@using CraftTrip.Core.Entities
+@using CraftTrip.Core.Enums
+@using CraftTrip.Services.DTOs
+@{
+    ViewData["Title"] = "Quản trị Tài chính & Đối soát Nền tảng";
+    var stats = Model?.Stats ?? (ViewBag.Stats as AdminFinancialSummaryDto) ?? new AdminFinancialSummaryDto();
+    var bookings = Model?.Bookings ?? (ViewBag.Bookings as List<Booking>) ?? new List<Booking>();
+    var payouts = Model?.Payouts ?? (ViewBag.Payouts as List<HostPayout>) ?? new List<HostPayout>();
+    var refunds = Model?.Refunds ?? (ViewBag.Refunds as List<Refund>) ?? new List<Refund>();
+    var rule = Model?.CommissionRule ?? (ViewBag.CommissionRule as CommissionRule) ?? new CommissionRule();
+}
+
+<div class="admin-container py-4">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+        <div>
+            <h1 class="h2 fw-bold text-dark mb-1">Tài chính Nền tảng & Đối soát Host</h1>
+            <p class="text-muted fs-6 mb-0">Theo dõi dòng tiền, cấu hình tỷ lệ hoa hồng động và kích hoạt đối soát tự động sau 24h kết thúc buổi trải nghiệm</p>
+        </div>
+        <div class="d-flex gap-2">
+            <form asp-action="ProcessEligiblePayouts" method="post">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-success rounded-pill px-4 shadow-sm" onclick="return confirm('Kích hoạt quét và kết chuyển tất cả các khoản thanh toán sau 24h kết thúc buổi học vào ví của Host?');">
+                    <i class="bi bi-arrow-repeat me-2"></i> Đối soát & Chuyển tiền Payout (> 24h)
+                </button>
+            </form>
+            <button type="button" class="btn btn-primary rounded-pill px-4 shadow-sm" data-bs-toggle="modal" data-bs-target="#commissionModal">
+                <i class="bi bi-sliders me-2"></i> Cấu hình Hoa hồng
+            </button>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show rounded-4 p-3 mb-4" role="alert">
+            <i class="bi bi-check-circle-fill me-2 fs-5"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show rounded-4 p-3 mb-4" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- 5 Thẻ tóm tắt tài chính -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-4 col-xl">
+            <div class="card shadow-sm border-0 rounded-4 p-4 h-100 bg-white">
+                <span class="fs-6 text-muted mb-1 d-block">Tổng doanh thu vé (Gross)</span>
+                <h3 class="fw-bold text-dark mb-0">@stats.TotalGrossBookingAmount.ToString("N0") đ</h3>
+            </div>
+        </div>
+
+        <div class="col-md-4 col-xl">
+            <div class="card shadow-sm border-0 rounded-4 p-4 h-100 bg-white">
+                <span class="fs-6 text-muted mb-1 d-block">Hoa hồng nền tảng (Net)</span>
+                <h3 class="fw-bold text-success mb-0">@stats.TotalPlatformCommission.ToString("N0") đ</h3>
+            </div>
+        </div>
+
+        <div class="col-md-4 col-xl">
+            <div class="card shadow-sm border-0 rounded-4 p-4 h-100 bg-white">
+                <span class="fs-6 text-muted mb-1 d-block">Đã chi trả về ví Host</span>
+                <h3 class="fw-bold text-primary mb-0">@stats.TotalPaidToHosts.ToString("N0") đ</h3>
+            </div>
+        </div>
+
+        <div class="col-md-4 col-xl">
+            <div class="card shadow-sm border-0 rounded-4 p-4 h-100 bg-white">
+                <span class="fs-6 text-muted mb-1 d-block">Đang giữ chờ đủ 24h</span>
+                <h3 class="fw-bold text-warning mb-0">@stats.TotalPendingPayouts.ToString("N0") đ</h3>
+            </div>
+        </div>
+
+        <div class="col-md-4 col-xl">
+            <div class="card shadow-sm border-0 rounded-4 p-4 h-100 bg-white">
+                <span class="fs-6 text-muted mb-1 d-block">Tổng tiền hoàn cho khách</span>
+                <h3 class="fw-bold text-danger mb-0">@stats.TotalRefundedAmount.ToString("N0") đ</h3>
+            </div>
+        </div>
+    </div>
+
+    <!-- Thông tin quy tắc hoa hồng hiện hành -->
+    <div class="alert alert-light border shadow-xs rounded-4 p-4 mb-4 d-flex flex-wrap align-items-center justify-content-between gap-3">
+        <div class="d-flex align-items-center gap-3">
+            <i class="bi bi-info-circle-fill fs-2 text-primary"></i>
+            <div>
+                <h5 class="fw-bold mb-1">Chính sách hoa hồng hiện tại (BR_CM_01)</h5>
+                <p class="mb-0 text-muted">
+                    Nhóm nhỏ (&lt; @rule.GroupSizeThreshold khách): <strong class="text-primary">@(rule.SmallGroupRate * 100)%</strong> hoa hồng | 
+                    Nhóm lớn (&ge; @rule.GroupSizeThreshold khách): <strong class="text-danger">@(rule.LargeGroupRate * 100)%</strong> hoa hồng.
+                </p>
+            </div>
+        </div>
+        <button type="button" class="btn btn-outline-primary rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#commissionModal">
+            <i class="bi bi-pencil me-1"></i> Sửa quy tắc
+        </button>
+    </div>
+
+    <!-- Danh sách giao dịch & Khoản Payout -->
+    <div class="row g-4">
+        <!-- Đơn đặt chỗ gần đây -->
+        <div class="col-lg-7">
+            <div class="card shadow-sm border-0 rounded-4 p-4">
+                <h4 class="fw-bold text-dark mb-3"><i class="bi bi-ticket-detailed text-primary me-2"></i>Dòng tiền Đơn đặt chỗ</h4>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0 fs-6">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Mã đơn</th>
+                                <th>Khách hàng</th>
+                                <th class="text-end">Tổng tiền</th>
+                                <th class="text-end">Hoa hồng</th>
+                                <th class="text-end">Tiền Host</th>
+                                <th class="text-center">Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var b in bookings)
+                            {
+                                <tr>
+                                    <td class="font-monospace fw-bold text-primary">@b.BookingCode</td>
+                                    <td>
+                                        <div class="fw-semibold">@b.CustomerName</div>
+                                        <small class="text-muted">@b.Quantity người</small>
+                                    </td>
+                                    <td class="text-end fw-bold">@b.TotalAmount.ToString("N0") đ</td>
+                                    <td class="text-end text-success">@b.PlatformFee.ToString("N0") đ</td>
+                                    <td class="text-end text-primary fw-bold">@b.HostEarnings.ToString("N0") đ</td>
+                                    <td class="text-center">
+                                        <span class="badge bg-secondary rounded-pill">@b.Status</span>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Khoản kết chuyển Host (Payout) -->
+        <div class="col-lg-5">
+            <div class="card shadow-sm border-0 rounded-4 p-4">
+                <h4 class="fw-bold text-dark mb-3"><i class="bi bi-arrow-left-right text-success me-2"></i>Đối soát Payout Host</h4>
+                <div class="list-group list-group-flush gap-2">
+                    @foreach (var p in payouts)
+                    {
+                        <div class="list-group-item p-3 border rounded-3 bg-light">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <strong class="font-monospace text-primary">@(p.PayoutReference ?? p.Id.ToString("N")[..8])</strong>
+                                <span class="badge @(p.Status == PayoutStatus.Transferred ? "bg-success" : "bg-warning text-dark") rounded-pill">
+                                    @p.Status
+                                </span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="fw-semibold">@p.Host?.FullName</div>
+                                    <small class="text-muted">Đơn: @p.Booking?.BookingCode</small>
+                                </div>
+                                <span class="fw-bold text-success fs-6">@p.Amount.ToString("N0") đ</span>
+                            </div>
+                            <small class="text-muted d-block mt-1">Đủ điều kiện lúc: @p.EligibleAt.ToString("HH:mm dd/MM/yyyy")</small>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Cấu hình Hoa hồng -->
+<div class="modal fade" id="commissionModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">Cấu hình Tỷ lệ Hoa hồng Động (BR_CM_01)</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form asp-action="UpdateCommission" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-body pt-3">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">1. Tỷ lệ hoa hồng Nhóm nhỏ (thường 12%)</label>
+                        <div class="input-group">
+                            <input name="SmallGroupRate" type="number" step="0.01" min="0" max="0.5" value="@rule.SmallGroupRate" class="form-control" required />
+                            <span class="input-group-text">(0.12 = 12%)</span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">2. Tỷ lệ hoa hồng Nhóm lớn (thường 15%)</label>
+                        <div class="input-group">
+                            <input name="LargeGroupRate" type="number" step="0.01" min="0" max="0.5" value="@rule.LargeGroupRate" class="form-control" required />
+                            <span class="input-group-text">(0.15 = 15%)</span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">3. Ngưỡng số lượng khách chia nhóm nhỏ / nhóm lớn</label>
+                        <div class="input-group">
+                            <input name="GroupSizeThreshold" type="number" min="2" max="100" value="@rule.GroupSizeThreshold" class="form-control" required />
+                            <span class="input-group-text">người</span>
+                        </div>
+                        <small class="text-muted">Từ số lượng khách này trở lên sẽ áp dụng mức hoa hồng nhóm lớn.</small>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4 shadow">Lưu chính sách</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

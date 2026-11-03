@@ -1,0 +1,209 @@
+@model List<CraftTrip.Core.Entities.Workshop>
+@using CraftTrip.Core.Entities
+@{
+    ViewData["Title"] = "Kiểm duyệt Workshop & Sửa đổi";
+    var pendingRevisions = (List<WorkshopRevision>)ViewBag.PendingRevisions;
+}
+
+<div class="admin-container py-4">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+        <div>
+            <h1 class="h2 fw-bold text-dark mb-1">Kiểm duyệt Nội dung & Trải nghiệm</h1>
+            <p class="text-muted fs-6 mb-0">Xem xét và phê duyệt các workshop mới hoặc các phiên bản cập nhật từ Nghệ nhân trước khi công khai lên sàn</p>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show rounded-4 p-3 mb-4" role="alert">
+            <i class="bi bi-check-circle-fill me-2 fs-5"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show rounded-4 p-3 mb-4" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Tabs navigation -->
+    <ul class="nav nav-pills mb-4 gap-2" id="approvalTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active px-4 py-2 fs-6 rounded-pill" id="workshops-tab" data-bs-toggle="pill" data-bs-target="#workshops" type="button" role="tab">
+                <i class="bi bi-plus-circle me-1"></i> Workshop mới cần duyệt (@Model.Count)
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link px-4 py-2 fs-6 rounded-pill" id="revisions-tab" data-bs-toggle="pill" data-bs-target="#revisions" type="button" role="tab">
+                <i class="bi bi-arrow-repeat me-1"></i> Đề xuất sửa đổi Workshop đang bán (@pendingRevisions.Count)
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="approvalTabsContent">
+        <!-- Tab 1: Workshop mới -->
+        <div class="tab-pane fade show active" id="workshops" role="tabpanel">
+            <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
+                @if (!Model.Any())
+                {
+                    <div class="text-center py-5 text-muted">
+                        <i class="bi bi-inbox fs-1 mb-2 d-block"></i>
+                        Không có workshop mới nào đang chờ duyệt.
+                    </div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0 fs-6">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-4">Hình ảnh</th>
+                                    <th>Tên trải nghiệm</th>
+                                    <th>Nghệ nhân / Xưởng</th>
+                                    <th>Làng nghề & Danh mục</th>
+                                    <th>Giá vé</th>
+                                    <th class="text-center pe-4">Kiểm duyệt</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var w in Model)
+                                {
+                                    <tr>
+                                        <td class="ps-4">
+                                            <img src="@w.CoverImageUrl" class="rounded-3 shadow-xs" style="width: 70px; height: 50px; object-fit: cover;" alt="@w.Title" />
+                                        </td>
+                                        <td>
+                                            <div class="fw-bold text-dark">@w.Title</div>
+                                            <small class="text-muted d-block text-truncate" style="max-width: 320px;">@w.ShortDescription</small>
+                                        </td>
+                                        <td>
+                                            <div class="fw-semibold">@w.Host?.FullName</div>
+                                            <small class="text-muted">@w.Host?.HostProfile?.StudioName</small>
+                                        </td>
+                                        <td>
+                                            <div>@w.Village?.Name</div>
+                                            <small class="badge bg-light text-dark border">@w.Category?.Name</small>
+                                        </td>
+                                        <td class="fw-bold text-primary">
+                                            @w.BasePrice.ToString("N0") đ
+                                        </td>
+                                        <td class="text-center pe-4">
+                                            <div class="d-flex justify-content-center gap-2">
+                                                <form asp-action="ApproveWorkshop" method="post">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="workshopId" value="@w.Id" />
+                                                    <button type="submit" class="btn btn-success btn-sm rounded-pill px-3">
+                                                        <i class="bi bi-check-lg me-1"></i> Phê duyệt
+                                                    </button>
+                                                </form>
+                                                <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#rejectWorkshopModal_@w.Id">
+                                                    <i class="bi bi-x-lg me-1"></i> Từ chối
+                                                </button>
+                                            </div>
+
+                                            <!-- Modal Từ chối Workshop -->
+                                            <div class="modal fade" id="rejectWorkshopModal_@w.Id" tabindex="-1" aria-hidden="true">
+                                                <div class="modal-dialog modal-dialog-centered text-start">
+                                                    <div class="modal-content rounded-4 border-0 shadow">
+                                                        <form asp-action="RejectWorkshop" method="post">
+                                                            @Html.AntiForgeryToken()
+                                                            <input type="hidden" name="workshopId" value="@w.Id" />
+                                                            <div class="modal-header border-0 pb-0">
+                                                                <h5 class="modal-title fw-bold text-danger">Từ chối duyệt Workshop</h5>
+                                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                            </div>
+                                                            <div class="modal-body pt-3">
+                                                                <p class="text-muted small mb-3">Workshop: <strong>@w.Title</strong></p>
+                                                                <div class="mb-3">
+                                                                    <label class="form-label fw-semibold">Lý do từ chối (Gửi thông báo tới Host):</label>
+                                                                    <textarea name="reason" class="form-control" rows="3" placeholder="Ví dụ: Hình ảnh chưa rõ nét, vui lòng bổ sung ảnh chụp không gian xưởng..." required></textarea>
+                                                                </div>
+                                                            </div>
+                                                            <div class="modal-footer border-0 pt-0">
+                                                                <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Đóng</button>
+                                                                <button type="submit" class="btn btn-danger rounded-pill px-4">Xác nhận từ chối</button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Tab 2: Sửa đổi Workshop đang bán (WorkshopRevision) -->
+        <div class="tab-pane fade" id="revisions" role="tabpanel">
+            <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
+                @if (!pendingRevisions.Any())
+                {
+                    <div class="text-center py-5 text-muted">
+                        <i class="bi bi-check2-circle fs-1 mb-2 d-block"></i>
+                        Không có đề xuất chỉnh sửa nào đang chờ duyệt.
+                    </div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0 fs-6">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-4">Workshop gốc</th>
+                                    <th>Tiêu đề đề xuất mới</th>
+                                    <th>Giá đề xuất</th>
+                                    <th>Thời lượng</th>
+                                    <th>Ngày gửi</th>
+                                    <th class="text-center pe-4">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var rev in pendingRevisions)
+                                {
+                                    <tr>
+                                        <td class="ps-4">
+                                            <div class="fw-semibold">@rev.Workshop?.Title</div>
+                                            <small class="text-muted">Host: @rev.Workshop?.Host?.FullName</small>
+                                        </td>
+                                        <td>
+                                            <div class="fw-bold text-primary">@rev.ProposedTitle</div>
+                                            <small class="text-muted d-block text-truncate" style="max-width: 300px;">@rev.ProposedShortDescription</small>
+                                        </td>
+                                        <td class="fw-bold">@rev.ProposedBasePrice.ToString("N0") đ</td>
+                                        <td>@rev.ProposedDurationMinutes phút</td>
+                                        <td>@rev.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                                        <td class="text-center pe-4">
+                                            <div class="d-flex justify-content-center gap-2">
+                                                <form asp-action="ApproveRevision" method="post">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="revisionId" value="@rev.Id" />
+                                                    <button type="submit" class="btn btn-success btn-sm rounded-pill px-3">
+                                                        <i class="bi bi-check-lg me-1"></i> Áp dụng sửa đổi
+                                                    </button>
+                                                </form>
+                                                <form asp-action="RejectRevision" method="post">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="revisionId" value="@rev.Id" />
+                                                    <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3" onclick="return confirm('Bác có chắc muốn từ chối bản sửa đổi này?');">
+                                                        <i class="bi bi-x-lg me-1"></i> Bác bỏ
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

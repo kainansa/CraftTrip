@@ -1,0 +1,99 @@
+@model CraftTrip.Web.ViewModels.HostApplyViewModel
+@{
+    ViewData["Title"] = "Đăng ký mở xưởng trải nghiệm";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="text-center mb-5">
+                <span class="badge bg-primary-subtle text-primary px-3 py-2 fs-6 rounded-pill mb-2">Dành cho Nghệ nhân & Chủ xưởng</span>
+                <h1 class="display-6 fw-bold text-dark">Gia nhập cộng đồng Nghệ nhân CraftTrip</h1>
+                <p class="text-muted fs-5">Đưa di sản nghề truyền thống của gia đình và làng nghề tiếp cận hàng ngàn du khách trong và ngoài nước.</p>
+            </div>
+
+            <div class="card shadow-sm border-0 rounded-4 p-4 p-md-5">
+                <form asp-action="Index" method="post">
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-4"></div>
+
+                    <h4 class="fw-bold text-dark mb-4 border-bottom pb-2">
+                        <i class="bi bi-shop text-primary me-2"></i>1. Thông tin cơ sở trải nghiệm
+                    </h4>
+
+                    <div class="mb-3">
+                        <label asp-for="StudioName" class="form-label fw-semibold fs-6">Tên xưởng / Cơ sở thủ công <span class="text-danger">*</span></label>
+                        <input asp-for="StudioName" class="form-control form-control-lg fs-6" placeholder="Ví dụ: Xưởng Gốm Nghệ Nhân Nguyễn Văn An" />
+                        <span asp-validation-for="StudioName" class="text-danger small"></span>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="CraftType" class="form-label fw-semibold fs-6">Loại hình nghề thủ công <span class="text-danger">*</span></label>
+                            <input asp-for="CraftType" class="form-control form-control-lg fs-6" placeholder="Ví dụ: Gốm Bát Tràng, Lụa Vạn Phúc..." />
+                            <span asp-validation-for="CraftType" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="VillageId" class="form-label fw-semibold fs-6">Thuộc Làng nghề</label>
+                            <select asp-for="VillageId" asp-items="ViewBag.Villages" class="form-select form-select-lg fs-6">
+                                <option value="">-- Chọn làng nghề --</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Address" class="form-label fw-semibold fs-6">Địa chỉ đón khách <span class="text-danger">*</span></label>
+                        <input asp-for="Address" class="form-control form-control-lg fs-6" placeholder="Ví dụ: Xóm 2, làng cổ Bát Tràng, Gia Lâm, Hà Nội" />
+                        <span asp-validation-for="Address" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="Bio" class="form-label fw-semibold fs-6">Đôi nét về truyền thống xưởng & tay nghề nghệ nhân <span class="text-danger">*</span></label>
+                        <textarea asp-for="Bio" class="form-control fs-6" rows="4" placeholder="Kể về bề dày kinh nghiệm, thế hệ làm nghề, niềm tự hào về sản phẩm thủ công..."></textarea>
+                        <span asp-validation-for="Bio" class="text-danger small"></span>
+                    </div>
+
+                    <h4 class="fw-bold text-dark mb-4 border-bottom pb-2">
+                        <i class="bi bi-shield-check text-primary me-2"></i>2. Thông tin pháp lý & Tài khoản nhận tiền
+                    </h4>
+
+                    <div class="mb-3">
+                        <label asp-for="IdCardNumber" class="form-label fw-semibold fs-6">Số CCCD / CMND của chủ cơ sở <span class="text-danger">*</span></label>
+                        <input asp-for="IdCardNumber" class="form-control form-control-lg fs-6 font-monospace" placeholder="12 chữ số trên thẻ căn cước" />
+                        <span asp-validation-for="IdCardNumber" class="text-danger small"></span>
+                    </div>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <label asp-for="BankName" class="form-label fw-semibold fs-6">Ngân hàng <span class="text-danger">*</span></label>
+                            <input asp-for="BankName" class="form-control form-control-lg fs-6" placeholder="Vietcombank" />
+                            <span asp-validation-for="BankName" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="BankAccountNumber" class="form-label fw-semibold fs-6">Số tài khoản <span class="text-danger">*</span></label>
+                            <input asp-for="BankAccountNumber" class="form-control form-control-lg fs-6 font-monospace" placeholder="0123456789" />
+                            <span asp-validation-for="BankAccountNumber" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="BankAccountName" class="form-label fw-semibold fs-6">Chủ tài khoản <span class="text-danger">*</span></label>
+                            <input asp-for="BankAccountName" class="form-control form-control-lg fs-6 text-uppercase" placeholder="NGUYEN VAN A" />
+                            <span asp-validation-for="BankAccountName" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="p-3 bg-light rounded-3 mb-4 text-muted small">
+                        <i class="bi bi-info-circle me-1"></i> Bằng việc bấm Đăng ký, bác đồng ý với Quy chế hoạt động và Chính sách đồng hành cùng nghệ nhân của CraftTrip.
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg w-100 py-3 fs-5 fw-bold rounded-4 shadow">
+                        <i class="bi bi-send-check me-2"></i> Hoàn tất đăng ký mở xưởng
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

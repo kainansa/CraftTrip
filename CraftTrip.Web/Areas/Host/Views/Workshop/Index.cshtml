@@ -1,0 +1,105 @@
+@model List<CraftTrip.Core.Entities.Workshop>
+@{
+    ViewData["Title"] = "Workshop của tôi";
+}
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+        <h2 class="font-serif fw-bold mb-1">Danh sách Workshop của Xưởng</h2>
+        <p class="text-muted small mb-0">Quản lý các buổi trải nghiệm, cập nhật nội dung và theo dõi trạng thái duyệt bài.</p>
+    </div>
+    <a asp-action="Create" class="btn btn-primary host-btn-lg">
+        <i class="bi bi-plus-circle"></i> Đăng Workshop mới
+    </a>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="card border-0 shadow-sm rounded-4 p-5 text-center bg-white">
+        <i class="bi bi-palette fs-1 text-muted opacity-50 mb-3 d-block"></i>
+        <h4 class="fw-bold">Xưởng chưa có workshop nào</h4>
+        <p class="text-muted small max-w-500 mx-auto">Hãy tạo trải nghiệm đầu tiên để giới thiệu nét đẹp nghề truyền thống của xưởng tới du khách.</p>
+        <a asp-action="Create" class="btn btn-primary host-btn-lg mx-auto mt-2">
+            Bắt đầu tạo Workshop ngay
+        </a>
+    </div>
+}
+else
+{
+    <div class="row g-4">
+        @foreach (var ws in Model)
+        {
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100 d-flex flex-column">
+                    <div class="d-flex gap-3 mb-3">
+                        <img src="@ws.CoverImageUrl" alt="@ws.Title" class="rounded-3 object-fit-cover shadow-sm flex-shrink-0" style="width: 100px; height: 100px;" />
+                        <div class="flex-grow-1 overflow-hidden">
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <span class="badge bg-light text-muted border small">@ws.Category?.Name</span>
+                                @if (ws.Status == WorkshopStatus.Published)
+                                {
+                                    <span class="badge bg-success px-2 py-1"><i class="bi bi-check-circle me-1"></i> Đang mở bán</span>
+                                }
+                                else if (ws.Status == WorkshopStatus.Pending)
+                                {
+                                    <span class="badge bg-warning text-dark px-2 py-1"><i class="bi bi-hourglass-split me-1"></i> Chờ Admin duyệt</span>
+                                }
+                                else if (ws.Status == WorkshopStatus.Rejected)
+                                {
+                                    <span class="badge bg-danger px-2 py-1"><i class="bi bi-exclamation-octagon me-1"></i> Cần sửa lại</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary px-2 py-1"><i class="bi bi-pencil me-1"></i> Bản nháp</span>
+                                }
+                            </div>
+                            <h5 class="fw-bold mb-1 text-truncate">@ws.Title</h5>
+                            <div class="small text-muted mb-1"><i class="bi bi-clock me-1"></i> @ws.DurationMinutes phút • Nhóm tối đa @ws.MaxParticipants người</div>
+                            <div class="price-tag fs-6">@ws.BasePrice.ToString("N0") đ <span class="price-unit">/ người</span></div>
+                        </div>
+                    </div>
+
+                    @if (ws.Status == WorkshopStatus.Rejected && !string.IsNullOrEmpty(ws.RejectionReason))
+                    {
+                        <div class="alert alert-danger border-0 small py-2 mb-3">
+                            <strong><i class="bi bi-exclamation-triangle-fill me-1"></i> Lý do cần sửa:</strong> @ws.RejectionReason
+                        </div>
+                    }
+
+                    @if (ws.Revisions.Any(r => r.Status == RevisionStatus.Pending))
+                    {
+                        <div class="alert alert-info border-0 small py-2 mb-3">
+                            <i class="bi bi-info-circle-fill me-1"></i> Bạn có một bản chỉnh sửa đang chờ ban quản trị phê duyệt.
+                        </div>
+                    }
+
+                    <div class="d-flex flex-wrap gap-2 mt-auto pt-3 border-top">
+                        <a asp-action="Edit" asp-route-id="@ws.Id" class="btn btn-outline-primary btn-sm py-2 px-3 fw-semibold">
+                            <i class="bi bi-pencil me-1"></i> Chỉnh sửa
+                        </a>
+
+                        <a asp-controller="Schedule" asp-action="Manage" asp-route-workshopId="@ws.Id" class="btn btn-outline-success btn-sm py-2 px-3 fw-semibold">
+                            <i class="bi bi-calendar3 me-1"></i> Quản lý Lịch & Chỗ trống
+                        </a>
+
+                        @if (ws.Status == WorkshopStatus.Draft || ws.Status == WorkshopStatus.Rejected)
+                        {
+                            <form asp-action="SubmitForReview" asp-route-id="@ws.Id" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-warning btn-sm py-2 px-3 text-dark fw-bold">
+                                    <i class="bi bi-send me-1"></i> Gửi duyệt
+                                </button>
+                            </form>
+                        }
+                        else if (ws.Status == WorkshopStatus.Published)
+                        {
+                            <a asp-area="" asp-controller="Workshop" asp-action="Details" asp-route-id="@ws.Id" target="_blank" class="btn btn-outline-secondary btn-sm py-2 px-3 ms-auto">
+                                <i class="bi bi-box-arrow-up-right me-1"></i> Xem trang khách
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

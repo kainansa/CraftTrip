@@ -1,0 +1,91 @@
+@model CraftTrip.Core.Entities.Booking
+@{
+    ViewData["Title"] = $"Chi tiết vé {Model.BookingCode}";
+    var slot = Model.Slot;
+    var sessionStart = slot != null && slot.Schedule != null ? slot.Schedule.Date.Date + slot.StartTime : DateTime.MinValue;
+    var canCancel = (Model.Status == CraftTrip.Core.Enums.BookingStatus.Confirmed || Model.Status == CraftTrip.Core.Enums.BookingStatus.Paid) &&
+                    (sessionStart - DateTime.UtcNow).TotalHours >= 48;
+}
+
+<div class="container py-4">
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index" class="text-decoration-none">Trang chủ</a></li>
+            <li class="breadcrumb-item"><a asp-action="History" class="text-decoration-none">Đơn đặt chỗ</a></li>
+            <li class="breadcrumb-item active" aria-current="page">@Model.BookingCode</li>
+        </ol>
+    </nav>
+
+    <div class="max-w-700 mx-auto">
+        <div class="card border-0 shadow-lg rounded-4 overflow-hidden bg-white mb-4">
+            <div class="p-4 bg-wood text-white d-flex justify-content-between align-items-center" style="background-color: var(--ct-wood);">
+                <div>
+                    <span class="badge bg-warning text-dark fw-bold mb-1">VÉ THAM GIA WORKSHOP</span>
+                    <h5 class="fw-bold mb-0 text-white">Mã đơn: @Model.BookingCode</h5>
+                </div>
+                <div>
+                    <span class="badge bg-white text-dark small px-3 py-2 fw-bold">@Model.Status</span>
+                </div>
+            </div>
+
+            <div class="p-4 p-md-5">
+                <div class="text-center mb-4">
+                    @if (Model.Ticket != null && !string.IsNullOrEmpty(Model.Ticket.QrCodeData))
+                    {
+                        <div class="p-3 bg-light rounded-4 border d-inline-block shadow-sm mb-2">
+                            <img src="@Model.Ticket.QrCodeData" alt="Mã QR vé" style="width: 200px; height: 200px;" />
+                        </div>
+                        <div class="small text-muted font-monospace">@Model.Ticket.TicketCode</div>
+                        @if (Model.AttendanceStatus == CraftTrip.Core.Enums.AttendanceStatus.CheckedIn)
+                        {
+                            <span class="badge bg-success-subtle text-success fs-6 mt-2 px-3 py-1">
+                                <i class="bi bi-check2-circle me-1"></i> ĐÃ ĐIỂM DANH CHECK-IN
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-light text-muted border fs-6 mt-2 px-3 py-1">
+                                <i class="bi bi-qr-code me-1"></i> Chưa check-in tại xưởng
+                            </span>
+                        }
+                    }
+                </div>
+
+                <h5 class="fw-bold mb-2">@Model.Workshop?.Title</h5>
+                <p class="small text-muted mb-3"><i class="bi bi-geo-alt-fill text-danger me-1"></i> @Model.Workshop?.LocationAddress</p>
+
+                <div class="bg-light rounded-3 p-3 small d-flex flex-column gap-2 mb-4">
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted">Ngày trải nghiệm:</span>
+                        <strong class="text-dark">@slot?.Schedule?.Date.ToString("dddd, dd/MM/yyyy", new System.Globalization.CultureInfo("vi-VN"))</strong>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted">Khung giờ ca:</span>
+                        <strong class="text-dark">@slot?.StartTime.ToString(@"hh\:mm") - @slot?.EndTime.ToString(@"hh\:mm")</strong>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted">Số lượng khách:</span>
+                        <strong class="text-dark">@Model.Quantity người</strong>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted">Khách đặt:</span>
+                        <strong class="text-dark">@Model.CustomerName (@Model.CustomerPhone)</strong>
+                    </div>
+                    <div class="d-flex justify-content-between pt-2 border-top">
+                        <span class="text-muted">Tổng thanh toán:</span>
+                        <strong class="text-terracotta fs-6">@Model.TotalAmount.ToString("N0") đ</strong>
+                    </div>
+                </div>
+
+                @if (canCancel)
+                {
+                    <div class="d-grid">
+                        <a asp-action="Cancel" asp-route-id="@Model.Id" class="btn btn-outline-danger btn-sm">
+                            <i class="bi bi-x-circle me-1"></i> Hủy vé này (Hoàn 100% trước 48h)
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

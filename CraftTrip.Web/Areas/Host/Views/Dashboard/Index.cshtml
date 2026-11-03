@@ -1,0 +1,206 @@
+@model CraftTrip.Web.ViewModels.HostDashboardViewModel
+@{
+    ViewData["Title"] = "Tổng quan Xưởng";
+    var profile = Model.Profile;
+}
+
+<div class="mb-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+        <div>
+            <span class="badge bg-gold text-dark mb-1">Cơ sở: @profile.StudioName</span>
+            <h2 class="font-serif fw-bold mb-0">Xin chào Bác/Cô/Chú, @User.Identity?.Name!</h2>
+            <p class="text-muted small mb-0">Chúc xưởng một ngày làm việc nhiều niềm vui và đón nhiều lượt khách quý.</p>
+        </div>
+
+        <div class="d-flex gap-2">
+            <a asp-controller="Booking" asp-action="CheckIn" class="btn btn-danger host-btn-lg">
+                <i class="bi bi-qr-code-scan"></i> Điểm danh khách (QR)
+            </a>
+            <a asp-controller="Workshop" asp-action="Create" class="btn btn-primary host-btn-lg">
+                <i class="bi bi-plus-circle"></i> Đăng Workshop mới
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Summary Metric Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+        <div class="host-metric-card">
+            <div class="text-muted small fw-bold text-uppercase">Workshop hoạt động</div>
+            <div class="host-metric-val text-success">@Model.ActiveWorkshopsCount</div>
+            <div class="small text-muted mt-1"><i class="bi bi-eye"></i> Đang mở nhận khách</div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="host-metric-card">
+            <div class="text-muted small fw-bold text-uppercase">Chờ Admin duyệt</div>
+            <div class="host-metric-val text-warning">@Model.PendingWorkshopsCount</div>
+            <div class="small text-muted mt-1"><i class="bi bi-hourglass-split"></i> Đang kiểm duyệt</div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="host-metric-card">
+            <div class="text-muted small fw-bold text-uppercase">Khách sắp đến</div>
+            <div class="host-metric-val text-primary">@Model.UpcomingBookingsCount</div>
+            <div class="small text-muted mt-1"><i class="bi bi-people"></i> Vé đã xác nhận</div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="host-metric-card">
+            <div class="text-muted small fw-bold text-uppercase">Số dư ví có thể rút</div>
+            <div class="host-metric-val text-wood">@Model.AvailableWalletBalance.ToString("N0") <span class="fs-6 text-muted">đ</span></div>
+            <div class="small text-success mt-1"><i class="bi bi-check2-circle"></i> Sẵn sàng chuyển khoản</div>
+        </div>
+    </div>
+</div>
+
+<!-- Large Action Cards for Artisans (Part 4.2) -->
+<h4 class="font-serif fw-bold mb-3">Thao tác nhanh cho Xưởng</h4>
+<div class="row g-3 mb-5">
+    <div class="col-md-4">
+        <a asp-controller="Workshop" asp-action="Create" class="host-action-card">
+            <div class="d-flex align-items-center gap-3">
+                <div class="p-3 rounded-4 bg-primary-subtle text-primary fs-3">
+                    <i class="bi bi-plus-square-fill"></i>
+                </div>
+                <div>
+                    <h5 class="fw-bold mb-1">Đăng Workshop mới</h5>
+                    <p class="small text-muted mb-0">Tạo buổi trải nghiệm mới theo từng bước hướng dẫn dễ hiểu.</p>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-md-4">
+        <a asp-controller="Booking" asp-action="CheckIn" class="host-action-card border-danger-subtle">
+            <div class="d-flex align-items-center gap-3">
+                <div class="p-3 rounded-4 bg-danger-subtle text-danger fs-3">
+                    <i class="bi bi-qr-code-scan"></i>
+                </div>
+                <div>
+                    <h5 class="fw-bold mb-1 text-danger">Quét vé QR điểm danh</h5>
+                    <p class="small text-muted mb-0">Quét mã vé điện tử của khách khi họ tới xưởng.</p>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-md-4">
+        <a asp-controller="Finance" asp-action="Index" class="host-action-card border-success-subtle">
+            <div class="d-flex align-items-center gap-3">
+                <div class="p-3 rounded-4 bg-success-subtle text-success fs-3">
+                    <i class="bi bi-wallet2"></i>
+                </div>
+                <div>
+                    <h5 class="fw-bold mb-1 text-success">Xem Doanh thu & Rút tiền</h5>
+                    <p class="small text-muted mb-0">Đối soát tiền vé sau 24h và tạo lệnh rút về ngân hàng.</p>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+
+<!-- Recent Bookings Section -->
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="font-serif fw-bold mb-0">Đơn khách đặt gần đây</h5>
+                <a asp-controller="Booking" asp-action="Index" class="small fw-bold text-decoration-none text-wood">Xem tất cả <i class="bi bi-arrow-right"></i></a>
+            </div>
+
+            @if (!Model.RecentBookings.Any())
+            {
+                <div class="text-center py-4 text-muted small">
+                    Chưa có đơn đặt vé nào gần đây.
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle small mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Mã vé</th>
+                                <th>Khách hàng</th>
+                                <th>Buổi trải nghiệm</th>
+                                <th>Số vé</th>
+                                <th>Điểm danh</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var b in Model.RecentBookings)
+                            {
+                                <tr>
+                                    <td class="font-monospace fw-bold">@b.BookingCode</td>
+                                    <td>
+                                        <div class="fw-semibold">@b.CustomerName</div>
+                                        <div class="text-muted" style="font-size: 0.75rem;">@b.CustomerPhone</div>
+                                    </td>
+                                    <td>
+                                        <div class="text-truncate" style="max-width: 180px;">@b.Workshop?.Title</div>
+                                        <small class="text-muted">@b.Slot?.Schedule?.Date.ToString("dd/MM") • @b.Slot?.StartTime.ToString(@"hh\:mm")</small>
+                                    </td>
+                                    <td><span class="badge bg-light text-dark border">@b.Quantity người</span></td>
+                                    <td>
+                                        @if (b.AttendanceStatus == AttendanceStatus.CheckedIn)
+                                        {
+                                            <span class="badge bg-success-subtle text-success"><i class="bi bi-check2"></i> Đã đến</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-warning-subtle text-warning">Chưa đến</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <a asp-controller="Booking" asp-action="Details" asp-route-id="@b.Id" class="btn btn-sm btn-outline-primary py-1">
+                                            Xem
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Workshop quick view -->
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="font-serif fw-bold mb-0">Workshop của xưởng</h5>
+                <a asp-controller="Workshop" asp-action="Index" class="small fw-bold text-decoration-none text-wood">Quản lý <i class="bi bi-arrow-right"></i></a>
+            </div>
+
+            @if (!Model.MyWorkshops.Any())
+            {
+                <div class="text-center py-4 text-muted small">
+                    Bạn chưa có workshop nào. Hãy tạo ngay!
+                </div>
+            }
+            else
+            {
+                <div class="d-flex flex-column gap-3">
+                    @foreach (var ws in Model.MyWorkshops.Take(4))
+                    {
+                        <div class="p-3 rounded-3 border bg-light d-flex align-items-center gap-3">
+                            <img src="@ws.CoverImageUrl" alt="@ws.Title" class="rounded-3 object-fit-cover shadow-sm flex-shrink-0" style="width: 55px; height: 55px;" />
+                            <div class="flex-grow-1 overflow-hidden">
+                                <h6 class="fw-bold mb-0 text-truncate small">@ws.Title</h6>
+                                <span class="badge bg-white text-muted border" style="font-size: 0.7rem;">@ws.Status</span>
+                                <div class="price-tag fs-6 mt-1">@ws.BasePrice.ToString("N0") đ</div>
+                            </div>
+                            <a asp-controller="Schedule" asp-action="Manage" asp-route-workshopId="@ws.Id" class="btn btn-sm btn-outline-primary" title="Cài đặt lịch">
+                                <i class="bi bi-calendar3"></i>
+                            </a>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>

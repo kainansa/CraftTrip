@@ -1,0 +1,98 @@
+@model List<CraftTrip.Core.Entities.ContentPage>
+@{
+    ViewData["Title"] = "Quản lý Nội dung Website (CMS)";
+}
+
+<div class="admin-container py-4">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+        <div>
+            <h1 class="h2 fw-bold text-dark mb-1">Quản lý Nội dung Trang & Banner (CMS)</h1>
+            <p class="text-muted fs-6 mb-0">Chỉnh sửa trực tiếp tiêu đề, thông điệp truyền thông, banner và nút bấm trên Trang chủ mà không cần can thiệp mã nguồn</p>
+        </div>
+        <a asp-action="Media" class="btn btn-outline-primary rounded-pill px-4">
+            <i class="bi bi-images me-2"></i> Thư viện Hình ảnh
+        </a>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show rounded-4 p-3 mb-4" role="alert">
+            <i class="bi bi-check-circle-fill me-2 fs-5"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show rounded-4 p-3 mb-4" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="row g-4">
+        @foreach (var pageItem in Model)
+        {
+            <div class="col-12">
+                <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
+                    <div class="card-header bg-light py-3 px-4 d-flex align-items-center justify-content-between">
+                        <div>
+                            <h4 class="fw-bold mb-0 text-dark"><i class="bi bi-window text-primary me-2"></i>Trang: @pageItem.Title</h4>
+                            <small class="text-muted font-monospace">Mã trang: @pageItem.PageKey</small>
+                        </div>
+                        <span class="badge bg-secondary font-monospace">@pageItem.Sections.Count khu vực</span>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0 fs-6">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-4">Mã mục (Key)</th>
+                                    <th>Tiêu đề mục hiển thị</th>
+                                    <th>Mô tả phụ / Thông điệp</th>
+                                    <th>Nút bấm (CTA)</th>
+                                    <th class="text-center pe-4">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var sec in pageItem.Sections.OrderBy(s => s.DisplayOrder))
+                                {
+                                    <tr>
+                                        <td class="ps-4 font-monospace fw-bold text-primary">@sec.SectionKey</td>
+                                        <td>
+                                            <div class="fw-bold text-dark">@sec.Title</div>
+                                            @if (!string.IsNullOrEmpty(sec.BackgroundImageUrl))
+                                            {
+                                                <small class="text-muted"><i class="bi bi-image me-1"></i>Có ảnh nền</small>
+                                            }
+                                        </td>
+                                        <td>
+                                            <div class="text-muted text-truncate" style="max-width: 320px;">@sec.Subtitle</div>
+                                        </td>
+                                        <td>
+                                            @if (!string.IsNullOrEmpty(sec.PrimaryCtaText))
+                                            {
+                                                <span class="badge bg-light text-dark border">
+                                                    @sec.PrimaryCtaText <i class="bi bi-arrow-right"></i> @sec.PrimaryCtaUrl
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted small">Không có</span>
+                                            }
+                                        </td>
+                                        <td class="text-center pe-4">
+                                            <a asp-action="EditSection" asp-route-id="@sec.Id" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                                                <i class="bi bi-pencil me-1"></i> Chỉnh sửa
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
